@@ -44,5 +44,12 @@ jobs:
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git add data/pinned-repos.yml
-          git diff --quiet && git diff --staged --quiet || (git commit -m "Update pinned repositories" && git push)
+          
+          # Stage exactly die Dateien, die versioniert werden sollen (kein .bak)
+          git add data/pinned-repos.yml docs/index.html
+          if git diff --quiet && git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Update pinned repositories and index"
+            git push
+          fi
