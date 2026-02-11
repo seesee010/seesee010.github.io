@@ -31,11 +31,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ls ..
-          ls
           pwd
-          cd scripts
-          python fetch_pinned.py
+          ls -la
+          ls -la scripts || echo "scripts missing"
           
       - name: Commit and push if changed
         run: |
