@@ -22,7 +22,7 @@ jobs:
         uses: actions/checkout@v4
         with:
             fetch-depth: 0
-            
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -30,7 +30,7 @@ jobs:
           
       - name: Install dependencies
         run: |
-          pip install requests pyyaml
+          pip install requests pyyaml beautifulsoup4
           
       - name: Fetch pinned repositories
         env:

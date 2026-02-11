@@ -1,173 +1,131 @@
 #!/usr/bin/env python3
+# coding: utf-8
 """
-Read data/pinned-repos.yml and inject rendered repo <div>s into docs/index.html.
-
-Place this file as scripts/fetch_pinned.py (workflow runs it from repo root: python scripts/fetch_pinned.py).
-Requires PyYAML (pip install pyyaml).
+Robustes Skript: liest data/pinned-repos.yml und ersetzt den Inhalt von
+<div id="repos-container"> in docs/index.html mit gerenderten repo-cards.
+Benötigt: pyyaml, beautifulsoup4
 """
-
 import os
 import sys
 import yaml
-import re
 from datetime import datetime
 from html import escape
+from bs4 import BeautifulSoup
 
 HERE = os.path.dirname(__file__)
-DATA_PATH = os.path.normpath(os.path.join(HERE, "..", "data", "pinned-repos.yml"))
-INDEX_PATH = os.path.normpath(os.path.join(HERE, "..", "docs", "index.html"))  # updated to docs/
+DATA_FILE = os.path.normpath(os.path.join(HERE, "..", "data", "pinned-repos.yml"))
+INDEX_FILE = os.path.normpath(os.path.join(HERE, "..", "docs", "index.html"))
 
 
 def load_yaml(path):
-    """Load YAML file from disk; return dict or None."""
-    if not os.path.exists(path):
-        print(f"ERROR: data file not found: {path}")
+    if not os.path.isfile(path):
+        print(f"ERROR: YAML not found: {path}")
         return None
     with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
+        try:
+            return yaml.safe_load(f)
+        except Exception as e:
+            print("ERROR parsing YAML:", e)
+            return None
 
 
-def build_repos_grid(repos):
-    """Return HTML string for <div class="repos-grid">...</div>"""
-    parts = ['<div class="repos-grid">']
-    for r in repos:
-        name = escape(str(r.get("name", "")))
-        url = escape(str(r.get("url", "#")))
-        description = escape(str(r.get("description") or "Keine Beschreibung verfügbar"))
-        stars = int(r.get("stars") or 0)
-        forks = int(r.get("forks") or 0)
-        language = r.get("language") or ""
-        language_color = r.get("language_color") or "#858585"
-        topics = r.get("topics") or []
+def build_repo_card_soup(soup, repo):
+    name = escape(str(repo.get("name", "") or ""))
+    url = escape(str(repo.get("url", "#")))
+    description = escape(str(repo.get("description") or "Keine Beschreibung verfügbar"))
+    stars = int(repo.get("stars") or 0)
+    forks = int(repo.get("forks") or 0)
+    language = repo.get("language") or ""
+    language_color = repo.get("language_color") or "#858585"
+    topics = repo.get("topics") or []
 
-        topics_html = ""
-        if topics:
-            topics_html = '<div class="topics">' + "".join(
-                f'<span class="topic-tag">{escape(str(t))}</span>' for t in topics
-            ) + '</div>'
-
-        lang_html = (
-            f'<div class="meta-item"><span class="language-dot" style="background-color: {escape(language_color)}"></span>'
-            f'<span>{escape(language)}</span></div>'
-            if language else ""
-        )
-
-        card = f"""
-        <div class="repo-card">
-            <div class="repo-header">
-                <i class="fas fa-code-branch repo-icon"></i>
-                <div class="repo-title">
-                    <a href="{url}" class="repo-name" target="_blank" rel="noopener">{name}</a>
-                </div>
+    card_html = f"""
+    <div class="repo-card">
+        <div class="repo-header">
+            <i class="fas fa-code-branch repo-icon"></i>
+            <div class="repo-title">
+                <a href="{url}" class="repo-name" target="_blank" rel="noopener">{name}</a>
             </div>
-
-            <p class="repo-description">{description}</p>
-
-            <div class="repo-meta">
-                {lang_html}
-                <div class="meta-item"><i class="fas fa-star"></i><span>{stars}</span></div>
-                <div class="meta-item"><i class="fas fa-code-fork"></i><span>{forks}</span></div>
-            </div>
-
-            {topics_html}
         </div>
-        """
-        parts.append(card)
-    parts.append("</div>")
-    return "\n".join(parts)
 
+        <p class="repo-description">{description}</p>
 
-def find_matching_div_end(html_text, open_tag_start_idx):
+        <div class="repo-meta">
+            {"<div class='meta-item'><span class='language-dot' style='background-color: " + escape(language_color) + "'></span><span>" + escape(language) + "</span></div>" if language else ""}
+            <div class="meta-item"><i class="fas fa-star"></i><span>{stars}</span></div>
+            <div class="meta-item"><i class="fas fa-code-fork"></i><span>{forks}</span></div>
+        </div>
+
+        {("<div class='topics'>" + ''.join(f"<span class='topic-tag'>{escape(str(t))}</span>" for t in topics) + "</div>") if topics else ""}
+    </div>
     """
-    Given the index of '<div' of the opening tag (e.g. <div id="repos-container"...),
-    return the index right after the matching closing </div>.
-    Handles nested divs.
-    """
-    open_tag_end = html_text.find(">", open_tag_start_idx)
-    if open_tag_end == -1:
-        raise ValueError("Malformed HTML: opening <div> has no '>'")
-    pos = open_tag_end + 1
-    depth = 1
-
-    regex = re.compile(r"<(/?)(div)(\s|>|/)", re.IGNORECASE)
-    while True:
-        m = regex.search(html_text, pos)
-        if not m:
-            raise ValueError("Malformed HTML: matching </div> not found")
-        is_closing = m.group(1) == "/"
-        if not is_closing:
-            depth += 1
-        else:
-            depth -= 1
-        pos = m.end()
-        if depth == 0:
-            closing_end = html_text.find(">", m.start())
-            if closing_end == -1:
-                raise ValueError("Malformed HTML: closing </div> has no '>'")
-            return closing_end + 1
+    return BeautifulSoup(card_html, "html.parser")
 
 
-def replace_repos_container(html_text, new_repos_html):
-    """Replace the inner content of the div with id='repos-container' with new_repos_html."""
-    start_tag_search = re.search(r'<div\s+id=["\']repos-container["\']', html_text, re.IGNORECASE)
-    if not start_tag_search:
-        raise ValueError('Could not find <div id="repos-container"> in index.html (docs/index.html)')
-    open_tag_start = start_tag_search.start()
-
-    end_after_closing = find_matching_div_end(html_text, open_tag_start)
-
-    opening_tag_end = html_text.find(">", start_tag_search.end() - 1)
-    if opening_tag_end == -1:
-        raise ValueError("Malformed HTML around repos-container opening tag")
-    new_html = html_text[:opening_tag_end + 1] + "\n" + new_repos_html + "\n" + html_text[end_after_closing:]
-    return new_html
-
-
-def update_last_updated(html_text, timestamp_text):
-    """Replace content of element with id='last-updated'."""
-    pattern = re.compile(r'(<p\b[^>]*id=["\']last-updated["\'][^>]*>)(.*?)(</p>)', re.IGNORECASE | re.DOTALL)
-    if pattern.search(html_text):
-        return pattern.sub(rf'\1{escape(timestamp_text)}\3', html_text, count=1)
-    return html_text
+def render_repos_grid(soup, repos):
+    wrapper = BeautifulSoup("<div class='repos-grid'></div>", "html.parser").div
+    for repo in repos:
+        card = build_repo_card_soup(soup, repo)
+        # append children of card into wrapper
+        wrapper.append(card)
+    return wrapper
 
 
 def main():
-    data = load_yaml(DATA_PATH)
+    data = load_yaml(DATA_FILE)
     if not data:
-        print("No data loaded; exiting.")
+        print("No YAML data; exiting.")
         sys.exit(0)
 
     repos = data.get("repositories") or []
-    if not repos:
-        print("No repositories in YAML; nothing to do.")
+    if not isinstance(repos, list) or len(repos) == 0:
+        print("No repositories found in YAML; nothing to do.")
         sys.exit(0)
 
-    if not os.path.exists(INDEX_PATH):
-        print(f"ERROR: docs/index.html not found at {INDEX_PATH}")
+    if not os.path.isfile(INDEX_FILE):
+        print(f"ERROR: docs/index.html not found at {INDEX_FILE}")
         sys.exit(1)
 
-    with open(INDEX_PATH, "r", encoding="utf-8") as f:
-        html_text = f.read()
+    # Read and parse index.html
+    with open(INDEX_FILE, "r", encoding="utf-8") as f:
+        html_raw = f.read()
 
-    new_repos_html = build_repos_grid(repos)
+    soup = BeautifulSoup(html_raw, "html.parser")
 
-    try:
-        new_html = replace_repos_container(html_text, new_repos_html)
-    except ValueError as e:
-        print(f"ERROR while replacing repos container: {e}")
+    container = soup.find(id="repos-container")
+    if container is None:
+        print("ERROR: could not find element with id='repos-container' in docs/index.html")
         sys.exit(1)
 
+    # replace inner contents of the container with new grid
+    new_grid = render_repos_grid(soup, repos)
+    container.clear()
+    # maintain existing indentation by inserting as children
+    for child in new_grid.contents:
+        container.append(child)
+
+    # Update last-updated element if present
+    last = soup.find(id="last-updated")
     ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    new_html = update_last_updated(new_html, f"Zuletzt aktualisiert: {ts}")
+    if last:
+        last.string = f"Zuletzt aktualisiert: {ts}"
+    else:
+        # fallback: try to find footer and append a small timestamp
+        footer = soup.find("footer")
+        if footer:
+            footer.append(BeautifulSoup(f'<p class="last-updated" id="last-updated">Zuletzt aktualisiert: {ts}</p>', "html.parser"))
 
-    backup_path = INDEX_PATH + ".bak"
+    # Backup original
+    backup_path = INDEX_FILE + ".bak"
     with open(backup_path, "w", encoding="utf-8") as bf:
-        bf.write(html_text)
+        bf.write(html_raw)
 
-    with open(INDEX_PATH, "w", encoding="utf-8") as f:
-        f.write(new_html)
+    # Write updated HTML
+    with open(INDEX_FILE, "w", encoding="utf-8") as f:
+        # use original encoding and minimal prettify to avoid extreme formatting changes
+        f.write(str(soup))
 
-    print(f"Updated {INDEX_PATH} with {len(repos)} repos. Backup saved to {backup_path}")
+    print(f"Updated {INDEX_FILE} with {len(repos)} repositories. Backup: {backup_path}")
 
 
 if __name__ == "__main__":
