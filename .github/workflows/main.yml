@@ -1,5 +1,8 @@
 name: Fetch Pinned Repositories
 
+permissions:
+  contents: write
+
 on:
   schedule:
     # Läuft täglich um 00:00 UTC
@@ -34,6 +37,8 @@ jobs:
           pwd
           ls -la
           ls -la scripts || echo "scripts missing"
+
+          python scripts/fetch_pinned.py
           
       - name: Commit and push if changed
         run: |
