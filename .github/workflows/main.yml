@@ -9,6 +9,10 @@ on:
 jobs:
   fetch-pinned:
     runs-on: ubuntu-latest
+    # Wir sagen GitHub explizit, wo das Hauptverzeichnis ist
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     
     steps:
       - name: Checkout repository
