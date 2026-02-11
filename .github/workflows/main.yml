@@ -34,7 +34,8 @@ jobs:
           ls ..
           ls
           pwd
-          python "${{ github.workspace }}/scripts/fetch_pinned.py"
+          cd scripts
+          python fetch_pinned.py
           
       - name: Commit and push if changed
         run: |
