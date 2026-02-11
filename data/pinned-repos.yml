@@ -1,0 +1,63 @@
+last_updated: '2026-02-11T02:24:08.457906Z'
+username: seesee010
+repositories:
+- name: My-WezTerm-Config
+  description: My whole WezTerm Config
+  url: https://github.com/seesee010/My-WezTerm-Config
+  stars: 1
+  forks: 0
+  language: Lua
+  language_color: '#000080'
+  homepage: ''
+  updated_at: '2026-01-26T08:19:49Z'
+  topics: []
+- name: Sfml-Test0
+  description: null
+  url: https://github.com/seesee010/Sfml-Test0
+  stars: 0
+  forks: 0
+  language: C++
+  language_color: '#f34b7d'
+  homepage: null
+  updated_at: '2025-11-01T19:43:50Z'
+  topics: []
+- name: Jiv
+  description: A cli tool doing the same shit as IntelliJ would do!
+  url: https://github.com/seesee010/Jiv
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: ''
+  updated_at: '2026-02-09T16:41:34Z'
+  topics: []
+- name: DynArray
+  description: my own fany lib for dynamic arrays (void *)
+  url: https://github.com/seesee010/DynArray
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: null
+  updated_at: '2025-12-17T07:15:54Z'
+  topics: []
+- name: Esp32-C3-SuperMini-MQTT-BME280
+  description: Just as the title tell
+  url: https://github.com/seesee010/Esp32-C3-SuperMini-MQTT-BME280
+  stars: 0
+  forks: 0
+  language: C++
+  language_color: '#f34b7d'
+  homepage: null
+  updated_at: '2026-01-31T19:44:39Z'
+  topics: []
+- name: Usb_a-to-pinhead
+  description: Do not use it, it is mostly really bad designed
+  url: https://github.com/seesee010/Usb_a-to-pinhead
+  stars: 0
+  forks: 0
+  language: null
+  language_color: null
+  homepage: null
+  updated_at: '2026-01-26T13:22:27Z'
+  topics: []
