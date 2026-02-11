@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Read data/pinned-repos.yml and inject rendered repo <div>s into index.html.
+Read data/pinned-repos.yml and inject rendered repo <div>s into docs/index.html.
 
-Place this file as scripts/fetch_pinned.py (it will be run from the workflow).
+Place this file as scripts/fetch_pinned.py (workflow runs it from repo root: python scripts/fetch_pinned.py).
+Requires PyYAML (pip install pyyaml).
 """
 
 import os
@@ -14,10 +15,11 @@ from html import escape
 
 HERE = os.path.dirname(__file__)
 DATA_PATH = os.path.normpath(os.path.join(HERE, "..", "data", "pinned-repos.yml"))
-INDEX_PATH = os.path.normpath(os.path.join(HERE, "..", "index.html"))
+INDEX_PATH = os.path.normpath(os.path.join(HERE, "..", "docs", "index.html"))  # updated to docs/
 
 
 def load_yaml(path):
+    """Load YAML file from disk; return dict or None."""
     if not os.path.exists(path):
         print(f"ERROR: data file not found: {path}")
         return None
@@ -79,16 +81,14 @@ def find_matching_div_end(html_text, open_tag_start_idx):
     """
     Given the index of '<div' of the opening tag (e.g. <div id="repos-container"...),
     return the index right after the matching closing </div>.
-    This handles nested divs.
+    Handles nested divs.
     """
-    # find the end of the opening tag '>'
     open_tag_end = html_text.find(">", open_tag_start_idx)
     if open_tag_end == -1:
         raise ValueError("Malformed HTML: opening <div> has no '>'")
     pos = open_tag_end + 1
-    depth = 1  # we are inside the first (outer) div
+    depth = 1
 
-    # regex patterns (case-insensitive)
     regex = re.compile(r"<(/?)(div)(\s|>|/)", re.IGNORECASE)
     while True:
         m = regex.search(html_text, pos)
@@ -101,7 +101,6 @@ def find_matching_div_end(html_text, open_tag_start_idx):
             depth -= 1
         pos = m.end()
         if depth == 0:
-            # find end of this closing tag '>'
             closing_end = html_text.find(">", m.start())
             if closing_end == -1:
                 raise ValueError("Malformed HTML: closing </div> has no '>'")
@@ -109,17 +108,14 @@ def find_matching_div_end(html_text, open_tag_start_idx):
 
 
 def replace_repos_container(html_text, new_repos_html):
+    """Replace the inner content of the div with id='repos-container' with new_repos_html."""
     start_tag_search = re.search(r'<div\s+id=["\']repos-container["\']', html_text, re.IGNORECASE)
     if not start_tag_search:
-        raise ValueError('Could not find <div id="repos-container"> in index.html')
+        raise ValueError('Could not find <div id="repos-container"> in index.html (docs/index.html)')
     open_tag_start = start_tag_search.start()
-    replacement_start = start_tag_search.end()
 
-    # find matching closing </div> for that container
     end_after_closing = find_matching_div_end(html_text, open_tag_start)
 
-    # Rebuild html: keep everything up to end of opening tag, insert new_repos_html, then append remainder
-    # Find the position of '>' that closes the opening tag
     opening_tag_end = html_text.find(">", start_tag_search.end() - 1)
     if opening_tag_end == -1:
         raise ValueError("Malformed HTML around repos-container opening tag")
@@ -128,10 +124,7 @@ def replace_repos_container(html_text, new_repos_html):
 
 
 def update_last_updated(html_text, timestamp_text):
-    """
-    Replace content of element with id="last-updated".
-    If the element doesn't exist, do nothing.
-    """
+    """Replace content of element with id='last-updated'."""
     pattern = re.compile(r'(<p\b[^>]*id=["\']last-updated["\'][^>]*>)(.*?)(</p>)', re.IGNORECASE | re.DOTALL)
     if pattern.search(html_text):
         return pattern.sub(rf'\1{escape(timestamp_text)}\3', html_text, count=1)
@@ -150,7 +143,7 @@ def main():
         sys.exit(0)
 
     if not os.path.exists(INDEX_PATH):
-        print(f"ERROR: index.html not found at {INDEX_PATH}")
+        print(f"ERROR: docs/index.html not found at {INDEX_PATH}")
         sys.exit(1)
 
     with open(INDEX_PATH, "r", encoding="utf-8") as f:
@@ -164,11 +157,9 @@ def main():
         print(f"ERROR while replacing repos container: {e}")
         sys.exit(1)
 
-    # Update last-updated
     ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
     new_html = update_last_updated(new_html, f"Zuletzt aktualisiert: {ts}")
 
-    # Write backup (optional)
     backup_path = INDEX_PATH + ".bak"
     with open(backup_path, "w", encoding="utf-8") as bf:
         bf.write(html_text)
