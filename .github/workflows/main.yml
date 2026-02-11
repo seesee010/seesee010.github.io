@@ -27,7 +27,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python scripts/fetch_pinned.py
+          ls ..
+          ls
+          pwd
+          python "${{ github.workspace }}/scripts/fetch_pinned.py"
           
       - name: Commit and push if changed
         run: |
