@@ -1,95 +1,183 @@
-import requests
-from datetime import datetime
-import json
+#!/usr/bin/env python3
+"""
+Read data/pinned-repos.yml and inject rendered repo <div>s into index.html.
+
+Place this file as scripts/fetch_pinned.py (it will be run from the workflow).
+"""
+
 import os
+import sys
+import yaml
+import re
+from datetime import datetime
+from html import escape
 
-# GitHub Benutzername
-USERNAME = "seesee010"
-INDEX_HTML_PATH = "../index.html"  # relativ vom scripts-Ordner
+HERE = os.path.dirname(__file__)
+DATA_PATH = os.path.normpath(os.path.join(HERE, "..", "data", "pinned-repos.yml"))
+INDEX_PATH = os.path.normpath(os.path.join(HERE, "..", "index.html"))
 
-def fetch_pinned_repos(user):
-    url = f"https://api.github.com/users/{user}/repos?sort=updated&per_page=100"
-    headers = {"Accept": "application/vnd.github.v3+json"}
-    resp = requests.get(url, headers=headers)
-    resp.raise_for_status()
-    repos = resp.json()
-    
-    # Pinned simulieren: wir nehmen Top 6 nach Sternen
-    pinned = sorted(repos, key=lambda r: r['stargazers_count'], reverse=True)[:6]
 
-    result = []
-    for r in pinned:
-        result.append({
-            "name": r["name"],
-            "url": r["html_url"],
-            "description": r.get("description") or "",
-            "stars": r["stargazers_count"],
-            "forks": r["forks_count"],
-            "language": r.get("language"),
-            "language_color": "#858585",  # einfach neutral, du kannst mapping hinzufügen
-            "topics": r.get("topics", []),
-        })
-    return result
-
-def update_index_html(repos, path):
+def load_yaml(path):
+    if not os.path.exists(path):
+        print(f"ERROR: data file not found: {path}")
+        return None
     with open(path, "r", encoding="utf-8") as f:
-        html = f.read()
+        return yaml.safe_load(f)
 
-    # Neues div für die Repos
-    repos_div = '<div class="repos-grid">\n'
+
+def build_repos_grid(repos):
+    """Return HTML string for <div class="repos-grid">...</div>"""
+    parts = ['<div class="repos-grid">']
     for r in repos:
+        name = escape(str(r.get("name", "")))
+        url = escape(str(r.get("url", "#")))
+        description = escape(str(r.get("description") or "Keine Beschreibung verfügbar"))
+        stars = int(r.get("stars") or 0)
+        forks = int(r.get("forks") or 0)
+        language = r.get("language") or ""
+        language_color = r.get("language_color") or "#858585"
+        topics = r.get("topics") or []
+
         topics_html = ""
-        if r["topics"]:
+        if topics:
             topics_html = '<div class="topics">' + "".join(
-                f'<span class="topic-tag">{t}</span>' for t in r["topics"]
+                f'<span class="topic-tag">{escape(str(t))}</span>' for t in topics
             ) + '</div>'
-        repos_div += f'''
+
+        lang_html = (
+            f'<div class="meta-item"><span class="language-dot" style="background-color: {escape(language_color)}"></span>'
+            f'<span>{escape(language)}</span></div>'
+            if language else ""
+        )
+
+        card = f"""
         <div class="repo-card">
             <div class="repo-header">
                 <i class="fas fa-code-branch repo-icon"></i>
                 <div class="repo-title">
-                    <a href="{r['url']}" class="repo-name" target="_blank" rel="noopener">{r['name']}</a>
+                    <a href="{url}" class="repo-name" target="_blank" rel="noopener">{name}</a>
                 </div>
             </div>
-            <p class="repo-description">{r['description']}</p>
+
+            <p class="repo-description">{description}</p>
+
             <div class="repo-meta">
-                {f'<div class="meta-item"><span class="language-dot" style="background-color: {r["language_color"]}"></span><span>{r["language"]}</span></div>' if r["language"] else ""}
-                <div class="meta-item"><i class="fas fa-star"></i><span>{r['stars']}</span></div>
-                <div class="meta-item"><i class="fas fa-code-fork"></i><span>{r['forks']}</span></div>
+                {lang_html}
+                <div class="meta-item"><i class="fas fa-star"></i><span>{stars}</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>{forks}</span></div>
             </div>
+
             {topics_html}
         </div>
-        '''
-    repos_div += "\n</div>"
+        """
+        parts.append(card)
+    parts.append("</div>")
+    return "\n".join(parts)
 
-    # Alte Inhalte zwischen <div id="repos-container"> und </div> ersetzen
-    start_tag = '<div id="repos-container">'
-    end_tag = '</div>'
-    start_index = html.find(start_tag)
-    if start_index == -1:
-        raise ValueError("Konnte <div id=\"repos-container\"> nicht finden")
-    start_index += len(start_tag)
-    end_index = html.find(end_tag, start_index)
-    if end_index == -1:
-        raise ValueError("Konnte schließendes </div> nicht finden")
 
-    new_html = html[:start_index] + repos_div + html[end_index:]
-    
-    # Aktualisiere Zeitstempel
-    timestamp = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
-    if 'id="last-updated"' in new_html:
-        new_html = new_html.replace(
-            '<p class="last-updated" id="last-updated"></p>',
-            f'<p class="last-updated" id="last-updated">Zuletzt aktualisiert: {timestamp}</p>'
-        )
+def find_matching_div_end(html_text, open_tag_start_idx):
+    """
+    Given the index of '<div' of the opening tag (e.g. <div id="repos-container"...),
+    return the index right after the matching closing </div>.
+    This handles nested divs.
+    """
+    # find the end of the opening tag '>'
+    open_tag_end = html_text.find(">", open_tag_start_idx)
+    if open_tag_end == -1:
+        raise ValueError("Malformed HTML: opening <div> has no '>'")
+    pos = open_tag_end + 1
+    depth = 1  # we are inside the first (outer) div
 
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(new_html)
+    # regex patterns (case-insensitive)
+    regex = re.compile(r"<(/?)(div)(\s|>|/)", re.IGNORECASE)
+    while True:
+        m = regex.search(html_text, pos)
+        if not m:
+            raise ValueError("Malformed HTML: matching </div> not found")
+        is_closing = m.group(1) == "/"
+        if not is_closing:
+            depth += 1
+        else:
+            depth -= 1
+        pos = m.end()
+        if depth == 0:
+            # find end of this closing tag '>'
+            closing_end = html_text.find(">", m.start())
+            if closing_end == -1:
+                raise ValueError("Malformed HTML: closing </div> has no '>'")
+            return closing_end + 1
+
+
+def replace_repos_container(html_text, new_repos_html):
+    start_tag_search = re.search(r'<div\s+id=["\']repos-container["\']', html_text, re.IGNORECASE)
+    if not start_tag_search:
+        raise ValueError('Could not find <div id="repos-container"> in index.html')
+    open_tag_start = start_tag_search.start()
+    replacement_start = start_tag_search.end()
+
+    # find matching closing </div> for that container
+    end_after_closing = find_matching_div_end(html_text, open_tag_start)
+
+    # Rebuild html: keep everything up to end of opening tag, insert new_repos_html, then append remainder
+    # Find the position of '>' that closes the opening tag
+    opening_tag_end = html_text.find(">", start_tag_search.end() - 1)
+    if opening_tag_end == -1:
+        raise ValueError("Malformed HTML around repos-container opening tag")
+    new_html = html_text[:opening_tag_end + 1] + "\n" + new_repos_html + "\n" + html_text[end_after_closing:]
+    return new_html
+
+
+def update_last_updated(html_text, timestamp_text):
+    """
+    Replace content of element with id="last-updated".
+    If the element doesn't exist, do nothing.
+    """
+    pattern = re.compile(r'(<p\b[^>]*id=["\']last-updated["\'][^>]*>)(.*?)(</p>)', re.IGNORECASE | re.DOTALL)
+    if pattern.search(html_text):
+        return pattern.sub(rf'\1{escape(timestamp_text)}\3', html_text, count=1)
+    return html_text
+
 
 def main():
-    repos = fetch_pinned_repos(USERNAME)
-    update_index_html(repos, INDEX_HTML_PATH)
-    print(f"Updated {INDEX_HTML_PATH} with {len(repos)} pinned repos.")
+    data = load_yaml(DATA_PATH)
+    if not data:
+        print("No data loaded; exiting.")
+        sys.exit(0)
+
+    repos = data.get("repositories") or []
+    if not repos:
+        print("No repositories in YAML; nothing to do.")
+        sys.exit(0)
+
+    if not os.path.exists(INDEX_PATH):
+        print(f"ERROR: index.html not found at {INDEX_PATH}")
+        sys.exit(1)
+
+    with open(INDEX_PATH, "r", encoding="utf-8") as f:
+        html_text = f.read()
+
+    new_repos_html = build_repos_grid(repos)
+
+    try:
+        new_html = replace_repos_container(html_text, new_repos_html)
+    except ValueError as e:
+        print(f"ERROR while replacing repos container: {e}")
+        sys.exit(1)
+
+    # Update last-updated
+    ts = datetime.utcnow().strftime("%Y-%m-%d %H:%M UTC")
+    new_html = update_last_updated(new_html, f"Zuletzt aktualisiert: {ts}")
+
+    # Write backup (optional)
+    backup_path = INDEX_PATH + ".bak"
+    with open(backup_path, "w", encoding="utf-8") as bf:
+        bf.write(html_text)
+
+    with open(INDEX_PATH, "w", encoding="utf-8") as f:
+        f.write(new_html)
+
+    print(f"Updated {INDEX_PATH} with {len(repos)} repos. Backup saved to {backup_path}")
+
 
 if __name__ == "__main__":
     main()
