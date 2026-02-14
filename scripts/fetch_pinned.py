@@ -1,60 +1,132 @@
 #!/usr/bin/env python3
-# coding: utf-8
 """
-Enhanced fetch_pinned.py
-- Reads data/pinned-repos.yml
-- Renders ALL repositories into docs/index.html as a responsive grid of repo-cards
-- Generates an inline SVG horizontal bar chart of most-used languages
-- Uses BeautifulSoup for robust HTML injection
-- Keeps a backup docs/index.html.bak
-
-Place as: scripts/fetch_pinned.py
-Requires: pyyaml, beautifulsoup4
+Fetches pinned repositories from GitHub via GraphQL API,
+updates data/pinned-repos.yml, and regenerates docs/index.html.
 """
 
-from __future__ import annotations
 import os
 import sys
 import yaml
-from datetime import datetime
+import requests
+from datetime import datetime, timezone
 from html import escape
 from collections import Counter, OrderedDict
-from typing import List, Dict, Any, Tuple
-from bs4 import BeautifulSoup
 
-HERE = os.path.dirname(__file__)
-DATA_FILE = os.path.normpath(os.path.join(HERE, "..", "data", "pinned-repos.yml"))
-INDEX_FILE = os.path.normpath(os.path.join(HERE, "..", "docs", "index.html"))
-BACKUP_FILE = INDEX_FILE + ".bak"
+USERNAME = "seesee010"
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.normpath(os.path.join(HERE, ".."))
+DATA_FILE = os.path.join(ROOT, "data", "pinned-repos.yml")
+INDEX_FILE = os.path.join(ROOT, "docs", "index.html")
 
+GRAPHQL_URL = "https://api.github.com/graphql"
+GRAPHQL_QUERY = """
+query($login: String!) {
+  user(login: $login) {
+    pinnedItems(first: 6, types: REPOSITORY) {
+      nodes {
+        ... on Repository {
+          name
+          description
+          url
+          stargazerCount
+          forkCount
+          primaryLanguage { name, color }
+          homepageUrl
+          updatedAt
+          repositoryTopics(first: 10) {
+            nodes { topic { name } }
+          }
+        }
+      }
+    }
+  }
+}
+"""
 
-# Default fallback colours (used when language_color missing)
 DEFAULT_COLORS = [
-    "#58a6ff", "#3fb950", "#bc8cff", "#ffa657", "#f87171", "#7dd3fc",
-    "#f9a8d4", "#f4d35e", "#94a3b8", "#a78bfa"
+    "#58a6ff", "#3fb950", "#bc8cff", "#ffa657", "#f87171",
+    "#7dd3fc", "#f9a8d4", "#f4d35e", "#94a3b8", "#a78bfa",
 ]
 
 
-def load_yaml(path: str) -> Dict[str, Any] | None:
-    if not os.path.isfile(path):
-        print(f"ERROR: YAML not found: {path}")
+# ---------------------------------------------------------------------------
+# GitHub API
+# ---------------------------------------------------------------------------
+
+def fetch_pinned_repos(token):
+    headers = {"Authorization": f"Bearer {token}"}
+    resp = requests.post(
+        GRAPHQL_URL,
+        json={"query": GRAPHQL_QUERY, "variables": {"login": USERNAME}},
+        headers=headers,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    body = resp.json()
+
+    if "errors" in body:
+        print(f"GraphQL errors: {body['errors']}")
         return None
+
+    nodes = (
+        body.get("data", {})
+        .get("user", {})
+        .get("pinnedItems", {})
+        .get("nodes", [])
+    )
+
+    repos = []
+    for n in nodes:
+        lang = n.get("primaryLanguage") or {}
+        topics = [
+            t["topic"]["name"]
+            for t in n.get("repositoryTopics", {}).get("nodes", [])
+        ]
+        repos.append({
+            "name": n["name"],
+            "description": n.get("description"),
+            "url": n["url"],
+            "stars": n.get("stargazerCount", 0),
+            "forks": n.get("forkCount", 0),
+            "language": lang.get("name"),
+            "language_color": lang.get("color"),
+            "homepage": n.get("homepageUrl") or "",
+            "updated_at": n.get("updatedAt", ""),
+            "topics": topics,
+        })
+    return repos
+
+
+# ---------------------------------------------------------------------------
+# YAML persistence
+# ---------------------------------------------------------------------------
+
+def save_yaml(repos, path):
+    data = {
+        "last_updated": datetime.now(timezone.utc).isoformat(),
+        "username": USERNAME,
+        "repositories": repos,
+    }
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        yaml.dump(data, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+
+
+def load_yaml(path):
+    if not os.path.isfile(path):
+        return []
     with open(path, "r", encoding="utf-8") as f:
-        try:
-            return yaml.safe_load(f)
-        except Exception as e:
-            print("ERROR parsing YAML:", e)
-            return None
+        data = yaml.safe_load(f) or {}
+    return data.get("repositories", [])
 
 
-def collect_language_stats(repos: List[Dict[str, Any]]) -> Tuple[OrderedDict, Dict[str, str]]:
-    """
-    Count languages over all repos.
-    Return (OrderedDict(language -> count sorted desc), mapping language->color).
-    If YAML contains language_color, prefer that color.
-    """
+# ---------------------------------------------------------------------------
+# HTML generation
+# ---------------------------------------------------------------------------
+
+def build_language_bar(repos):
     counts = Counter()
-    color_map: Dict[str, str] = {}
+    color_map = {}
     for r in repos:
         lang = r.get("language") or "Unknown"
         counts[lang] += 1
@@ -62,207 +134,440 @@ def collect_language_stats(repos: List[Dict[str, Any]]) -> Tuple[OrderedDict, Di
         if lc:
             color_map[lang] = lc
 
-    # Fill missing colors from default palette
     defaults = iter(DEFAULT_COLORS)
-    for lang in list(counts.keys()):
+    for lang in counts:
         if lang not in color_map:
-            try:
-                color_map[lang] = next(defaults)
-            except StopIteration:
-                color_map[lang] = "#858585"
+            color_map[lang] = next(defaults, "#858585")
 
-    # Order by count desc
-    ordered = OrderedDict(sorted(counts.items(), key=lambda kv: kv[1], reverse=True))
-    return ordered, color_map
+    ordered = sorted(counts.items(), key=lambda kv: kv[1], reverse=True)
+    if not ordered:
+        return ""
 
+    total = sum(c for _, c in ordered)
+    segments = []
+    for lang, count in ordered:
+        pct = (count / total) * 100
+        color = color_map.get(lang, "#858585")
+        segments.append(
+            f'<div class="lang-segment" style="width:{pct:.1f}%;background:{color}" '
+            f'title="{escape(lang)} {pct:.0f}%"></div>'
+        )
 
-def build_lang_bar_svg(lang_counts: OrderedDict, color_map: Dict[str, str], max_bars: int = 8) -> str:
-    """
-    Build a simple horizontal bar SVG showing top languages.
-    If more languages than max_bars, aggregate rest into 'Other'.
-    """
-    items = list(lang_counts.items())
-    if not items:
-        return "<p>No language data</p>"
+    legend = []
+    for lang, count in ordered:
+        pct = (count / total) * 100
+        color = color_map.get(lang, "#858585")
+        legend.append(
+            f'<span class="lang-legend-item">'
+            f'<span class="language-dot" style="background-color:{color}"></span>'
+            f'{escape(lang)} <span class="lang-pct">{pct:.0f}%</span></span>'
+        )
 
-    total = sum(count for _, count in items)
-    top = items[:max_bars]
-    if len(items) > max_bars:
-        other_count = sum(c for _, c in items[max_bars:])
-        top.append(("Other", other_count))
-
-    # SVG layout
-    width = 720
-    label_width = 180
-    bar_area_w = width - label_width - 40
-    bar_h = 22
-    gap = 12
-    height = gap + len(top) * (bar_h + gap)
-
-    max_count = max(count for _, count in top) or 1
-
-    svg_parts = [
-        f'<svg width="{width}" height="{height}" viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Language usage chart">',
-        '<style>',
-        '  .lbl{font:13px/1.2 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}',
-        '  .meta{font:12px/1.2 system-ui, -apple-system, "Segoe UI", Roboto;}',
-        '</style>'
-    ]
-
-    y = gap
-    for name, count in top:
-        bar_w = int((count / max_count) * (bar_area_w))
-        color = color_map.get(name, "#858585")
-        # label
-        svg_parts.append(f'<text x="8" y="{y + bar_h*0.7}" class="lbl" fill="#e6edf3">{escape(name)}</text>')
-        # bar background
-        svg_parts.append(f'<rect x="{label_width}" y="{y}" width="{bar_area_w}" height="{bar_h}" rx="6" fill="#121317" />')
-        # bar value
-        svg_parts.append(f'<rect x="{label_width}" y="{y}" width="{bar_w}" height="{bar_h}" rx="6" fill="{color}" />')
-        # count text
-        percent = (count / total) * 100 if total else 0
-        txt = f"{count} • {percent:.0f}%"
-        svg_parts.append(f'<text x="{label_width + bar_area_w + 8}" y="{y + bar_h*0.7}" class="meta" fill="#c9d4dd">{escape(txt)}</text>')
-        y += bar_h + gap
-
-    svg_parts.append('</svg>')
-    return "\n".join(svg_parts)
+    return (
+        '<div class="lang-bar-wrapper">'
+        '<div class="lang-bar">' + "".join(segments) + '</div>'
+        '<div class="lang-legend">' + "".join(legend) + '</div>'
+        '</div>'
+    )
 
 
-def build_repos_grid_html(repos: List[Dict[str, Any]]) -> str:
-    """
-    Build the HTML string (safe-escaped) for all repo-cards in a grid.
-    Uses the same structure/classes as your CSS.
-    """
-    parts = ['<div class="repos-grid">']
+def build_repo_cards(repos):
+    cards = []
     for r in repos:
-        name = escape(str(r.get("name", "") or ""))
+        name = escape(str(r.get("name", "")))
         url = escape(str(r.get("url", "#")))
-        description = escape(str(r.get("description") or "Keine Beschreibung verfügbar"))
+        desc = escape(str(r.get("description") or "No description available"))
         stars = int(r.get("stars") or 0)
         forks = int(r.get("forks") or 0)
         language = r.get("language") or ""
-        language_color = r.get("language_color") or "#858585"
+        lang_color = r.get("language_color") or "#858585"
         topics = r.get("topics") or []
+
+        lang_html = ""
+        if language:
+            lang_html = (
+                f'<div class="meta-item">'
+                f'<span class="language-dot" style="background-color:{escape(lang_color)}"></span>'
+                f'<span>{escape(language)}</span></div>'
+            )
 
         topics_html = ""
         if topics:
-            topics_html = '<div class="topics">' + "".join(
-                f'<span class="topic-tag">{escape(str(t))}</span>' for t in topics
-            ) + '</div>'
+            tags = "".join(f'<span class="topic-tag">{escape(str(t))}</span>' for t in topics)
+            topics_html = f'<div class="topics">{tags}</div>'
 
-        lang_html = (
-            f'<div class="meta-item"><span class="language-dot" style="background-color: {escape(language_color)}"></span>'
-            f'<span>{escape(language)}</span></div>'
-            if language else ""
-        )
+        cards.append(f"""
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="{url}" class="repo-name" target="_blank" rel="noopener">{name}</a>
+                </div>
+            </div>
+            <p class="repo-description">{desc}</p>
+            <div class="repo-meta">
+                {lang_html}
+                <div class="meta-item"><i class="fas fa-star"></i><span>{stars}</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>{forks}</span></div>
+            </div>
+            {topics_html}
+        </div>""")
 
-        card = f"""
-<div class="repo-card">
-    <div class="repo-header">
-        <i class="fas fa-code-branch repo-icon"></i>
-        <div class="repo-title">
-            <a href="{url}" class="repo-name" target="_blank" rel="noopener">{name}</a>
+    return "\n".join(cards)
+
+
+def write_index(repos, path):
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    lang_bar = build_language_bar(repos)
+    repo_cards = build_repo_cards(repos)
+
+    html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>seesee010 | Pinned Projects</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+<style>
+    * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+
+    :root {{
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #1c2128;
+        --border-color: #30363d;
+        --text-primary: #e6edf3;
+        --text-secondary: #7d8590;
+        --accent-blue: #58a6ff;
+        --accent-green: #3fb950;
+        --accent-purple: #bc8cff;
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }}
+
+    body {{
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, #0a0e13 100%);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 40px 20px;
+        position: relative;
+        overflow-x: hidden;
+    }}
+
+    body::before {{
+        content: '';
+        position: fixed;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 70%);
+        animation: float 20s ease-in-out infinite;
+        pointer-events: none;
+    }}
+
+    @keyframes float {{
+        0%, 100% {{ transform: translate(0, 0) rotate(0deg); }}
+        50% {{ transform: translate(-20px, 20px) rotate(180deg); }}
+    }}
+
+    .container {{
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }}
+
+    header {{
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeInDown 0.8s ease-out;
+    }}
+
+    @keyframes fadeInDown {{
+        from {{ opacity: 0; transform: translateY(-30px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    h1 {{
+        font-size: 3.5em;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+        letter-spacing: -1px;
+    }}
+
+    .subtitle {{
+        color: var(--text-secondary);
+        font-size: 1.2em;
+        margin-top: 10px;
+    }}
+
+    .github-link {{
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }}
+
+    .github-link:hover {{
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        transform: translateY(-2px);
+    }}
+
+    /* Language bar */
+    .lang-bar-wrapper {{
+        margin-bottom: 32px;
+    }}
+
+    .lang-bar {{
+        display: flex;
+        height: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--bg-tertiary);
+        margin-bottom: 12px;
+    }}
+
+    .lang-segment {{
+        min-width: 4px;
+        transition: opacity 0.2s;
+    }}
+
+    .lang-segment:hover {{
+        opacity: 0.8;
+    }}
+
+    .lang-legend {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }}
+
+    .lang-legend-item {{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }}
+
+    .lang-pct {{
+        opacity: 0.7;
+    }}
+
+    /* Repo grid */
+    .repos-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }}
+
+    .repo-card {{
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+    }}
+
+    .repo-card::before {{
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 3px;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }}
+
+    .repo-card:hover::before {{ transform: scaleX(1); }}
+
+    @keyframes fadeInUp {{
+        from {{ opacity: 0; transform: translateY(30px); }}
+        to   {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    .repo-card:nth-child(1) {{ animation-delay: 0.1s; }}
+    .repo-card:nth-child(2) {{ animation-delay: 0.2s; }}
+    .repo-card:nth-child(3) {{ animation-delay: 0.3s; }}
+    .repo-card:nth-child(4) {{ animation-delay: 0.4s; }}
+    .repo-card:nth-child(5) {{ animation-delay: 0.5s; }}
+    .repo-card:nth-child(6) {{ animation-delay: 0.6s; }}
+
+    .repo-card:hover {{
+        transform: translateY(-8px);
+        border-color: var(--accent-blue);
+        box-shadow: var(--shadow);
+    }}
+
+    .repo-header {{
+        display: flex;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 16px;
+    }}
+
+    .repo-icon {{
+        font-size: 1.5em;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }}
+
+    .repo-title {{ flex: 1; }}
+
+    .repo-name {{
+        font-size: 1.3em;
+        font-weight: 700;
+        color: var(--accent-blue);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+        transition: color 0.3s ease;
+    }}
+
+    .repo-name:hover {{ color: var(--accent-purple); }}
+
+    .repo-description {{
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 16px;
+        min-height: 48px;
+    }}
+
+    .repo-meta {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+        font-size: 0.9em;
+    }}
+
+    .meta-item {{
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+    }}
+
+    .language-dot {{
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }}
+
+    .topics {{
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }}
+
+    .topic-tag {{
+        padding: 4px 12px;
+        background: rgba(88, 166, 255, 0.1);
+        border: 1px solid rgba(88, 166, 255, 0.3);
+        border-radius: 16px;
+        font-size: 0.85em;
+        color: var(--accent-blue);
+        transition: all 0.3s ease;
+    }}
+
+    .topic-tag:hover {{
+        background: rgba(88, 166, 255, 0.2);
+        border-color: var(--accent-blue);
+    }}
+
+    .footer {{
+        text-align: center;
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }}
+
+    .last-updated {{
+        font-size: 0.9em;
+        opacity: 0.7;
+    }}
+
+    @media (max-width: 768px) {{
+        h1 {{ font-size: 2.5em; }}
+        .repos-grid {{ grid-template-columns: 1fr; }}
+    }}
+</style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1><i class="fab fa-github"></i> seesee010</h1>
+        <p class="subtitle">Pinned Projects</p>
+        <a class="github-link" href="https://github.com/seesee010" target="_blank" rel="noopener">
+            <i class="fab fa-github"></i> Visit GitHub Profile
+        </a>
+    </header>
+
+    <div id="repos-container">
+        {lang_bar}
+        <div class="repos-grid">
+            {repo_cards}
         </div>
     </div>
 
-    <p class="repo-description">{description}</p>
-
-    <div class="repo-meta">
-        {lang_html}
-        <div class="meta-item"><i class="fas fa-star"></i><span>{stars}</span></div>
-        <div class="meta-item"><i class="fas fa-code-fork"></i><span>{forks}</span></div>
-    </div>
-
-    {topics_html}
+    <footer class="footer">
+        <p class="last-updated" id="last-updated">Last updated: {now}</p>
+    </footer>
 </div>
-"""
-        parts.append(card)
-    parts.append("</div>")
-    return "\n".join(parts)
+</body>
+</html>"""
+
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(html)
 
 
-def inject_into_index(html_path: str, new_fragment_html: str, timestamp_text: str) -> bool:
-    """
-    Use BeautifulSoup to replace the inner content of #repos-container with new_fragment_html
-    and update the #last-updated element with timestamp_text.
-    Returns True on success.
-    """
-    if not os.path.isfile(html_path):
-        print(f"ERROR: index file not found: {html_path}")
-        return False
-
-    with open(html_path, "r", encoding="utf-8") as f:
-        raw = f.read()
-
-    soup = BeautifulSoup(raw, "html.parser")
-    container = soup.find(id="repos-container")
-    if container is None:
-        print("ERROR: Could not find element with id='repos-container' in index.html")
-        return False
-
-    # Clear and insert new fragment (parse fragment to preserve nodes)
-    fragment = BeautifulSoup(new_fragment_html, "html.parser")
-    container.clear()
-    for child in fragment.contents:
-        container.append(child)
-
-    # Update last-updated text
-    last = soup.find(id="last-updated")
-    if last:
-        last.string = timestamp_text
-    else:
-        # attempt to insert footer timestamp if missing
-        footer = soup.find("footer")
-        if footer:
-            footer.append(BeautifulSoup(f'<p class="last-updated" id="last-updated">{timestamp_text}</p>', "html.parser"))
-
-    # backup and write
-    with open(BACKUP_FILE, "w", encoding="utf-8") as bf:
-        bf.write(raw)
-
-    with open(html_path, "w", encoding="utf-8") as f:
-        f.write(str(soup))
-
-    return True
-
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
 
 def main():
-    data = load_yaml(DATA_FILE)
-    if not data:
-        print("No YAML - exiting.")
+    token = os.environ.get("GITHUB_TOKEN")
+
+    repos = None
+    if token:
+        print(f"Fetching pinned repos for {USERNAME} via GraphQL...")
+        repos = fetch_pinned_repos(token)
+        if repos is not None:
+            print(f"Fetched {len(repos)} pinned repos.")
+            save_yaml(repos, DATA_FILE)
+        else:
+            print("GraphQL fetch failed, falling back to cached YAML.")
+
+    if repos is None:
+        print("Loading repos from cached YAML...")
+        repos = load_yaml(DATA_FILE)
+
+    if not repos:
+        print("No repos found. Nothing to do.")
         sys.exit(0)
 
-    repos = data.get("repositories") or []
-    # ensure we use ALL repos present in YAML
-    if not isinstance(repos, list) or len(repos) == 0:
-        print("No repos found in YAML - nothing to do.")
-        sys.exit(0)
-
-    # Build language stats & chart
-    lang_counts, color_map = collect_language_stats(repos)
-    svg_chart = build_lang_bar_svg(lang_counts, color_map, max_bars=8)
-
-    # Put chart and grid together
-    grid_html = build_repos_grid_html(repos)
-    combined_html = f"""
-<div class="pinned-dashboard">
-  <h2 style="margin-bottom:12px; color: #cfe8ff;">Language usage</h2>
-  <div class="lang-chart" style="margin-bottom:24px;">
-    {svg_chart}
-  </div>
-
-  <h2 style="margin:8px 0 16px; color:#cfe8ff;">Pinned repositories</h2>
-  {grid_html}
-</div>
-"""
-
-    ts = f"Zuletzt aktualisiert: {datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}"
-    ok = inject_into_index(INDEX_FILE, combined_html, ts)
-    if not ok:
-        sys.exit(1)
-
-    print(f"Updated {INDEX_FILE} with {len(repos)} repos and language chart.")
+    write_index(repos, INDEX_FILE)
+    print(f"Generated {INDEX_FILE} with {len(repos)} repos.")
 
 
 if __name__ == "__main__":

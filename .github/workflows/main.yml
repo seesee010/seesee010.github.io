@@ -5,51 +5,36 @@ permissions:
 
 on:
   schedule:
-    # Läuft täglich um 00:00 UTC
     - cron: '0 0 * * *'
-  workflow_dispatch: # Ermöglicht manuelles Auslösen
+  workflow_dispatch:
 
 jobs:
   fetch-pinned:
     runs-on: ubuntu-latest
-    # Wir sagen GitHub explizit, wo das Hauptverzeichnis ist
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-            fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          
+
       - name: Install dependencies
-        run: |
-          pip install requests pyyaml beautifulsoup4
-          
+        run: pip install requests pyyaml
+
       - name: Fetch pinned repositories
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pwd
-          ls -la
-          ls -la scripts || echo "scripts missing"
+        run: python scripts/fetch_pinned.py
 
-          python scripts/fetch_pinned.py
-          
       - name: Commit and push if changed
         run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          
-          # Stage exactly die Dateien, die versioniert werden sollen (kein .bak)
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add data/pinned-repos.yml docs/index.html
-          if git diff --quiet && git diff --staged --quiet; then
+          if git diff --staged --quiet; then
             echo "No changes to commit"
           else
             git commit -m "Update pinned repositories and index"

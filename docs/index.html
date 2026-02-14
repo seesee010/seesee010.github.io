@@ -1,314 +1,409 @@
 <!DOCTYPE html>
-
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>seesee010 | Pinned Projects</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
 <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        :root {
-            --bg-primary: #0d1117;
-            --bg-secondary: #161b22;
-            --bg-tertiary: #1c2128;
-            --border-color: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #7d8590;
-            --accent-blue: #58a6ff;
-            --accent-green: #3fb950;
-            --accent-purple: #bc8cff;
-            --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-        }
+    :root {
+        --bg-primary: #0d1117;
+        --bg-secondary: #161b22;
+        --bg-tertiary: #1c2128;
+        --border-color: #30363d;
+        --text-primary: #e6edf3;
+        --text-secondary: #7d8590;
+        --accent-blue: #58a6ff;
+        --accent-green: #3fb950;
+        --accent-purple: #bc8cff;
+        --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #0a0e13 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            padding: 40px 20px;
-            position: relative;
-            overflow-x: hidden;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: linear-gradient(135deg, var(--bg-primary) 0%, #0a0e13 100%);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 40px 20px;
+        position: relative;
+        overflow-x: hidden;
+    }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: -50%;
-            right: -50%;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 70%);
-            animation: float 20s ease-in-out infinite;
-            pointer-events: none;
-        }
+    body::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        right: -50%;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(88, 166, 255, 0.1) 0%, transparent 70%);
+        animation: float 20s ease-in-out infinite;
+        pointer-events: none;
+    }
 
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            50% { transform: translate(-20px, 20px) rotate(180deg); }
-        }
+    @keyframes float {
+        0%, 100% { transform: translate(0, 0) rotate(0deg); }
+        50% { transform: translate(-20px, 20px) rotate(180deg); }
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            z-index: 1;
-        }
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        position: relative;
+        z-index: 1;
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeInDown 0.8s ease-out;
-        }
+    header {
+        text-align: center;
+        margin-bottom: 60px;
+        animation: fadeInDown 0.8s ease-out;
+    }
 
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    @keyframes fadeInDown {
+        from { opacity: 0; transform: translateY(-30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
-        h1 {
-            font-size: 3.5em;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
+    h1 {
+        font-size: 3.5em;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-purple) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+        letter-spacing: -1px;
+    }
 
-        .subtitle {
-            color: var(--text-secondary);
-            font-size: 1.2em;
-            margin-top: 10px;
-        }
+    .subtitle {
+        color: var(--text-secondary);
+        font-size: 1.2em;
+        margin-top: 10px;
+    }
 
-        .github-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 20px;
-            padding: 12px 24px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
+    .github-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 20px;
+        padding: 12px 24px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-primary);
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
 
-        .github-link:hover {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
-            transform: translateY(-2px);
-        }
+    .github-link:hover {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
+        transform: translateY(-2px);
+    }
 
-        .repos-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-            gap: 24px;
-            margin-bottom: 40px;
-        }
+    /* Language bar */
+    .lang-bar-wrapper {
+        margin-bottom: 32px;
+    }
 
-        .repo-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            animation: fadeInUp 0.6s ease-out backwards;
-        }
+    .lang-bar {
+        display: flex;
+        height: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--bg-tertiary);
+        margin-bottom: 12px;
+    }
 
-        .repo-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
-            transform: scaleX(0);
-            transition: transform 0.3s ease;
-        }
+    .lang-segment {
+        min-width: 4px;
+        transition: opacity 0.2s;
+    }
 
-        .repo-card:hover::before {
-            transform: scaleX(1);
-        }
+    .lang-segment:hover {
+        opacity: 0.8;
+    }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .lang-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.85em;
+        color: var(--text-secondary);
+    }
 
-        .repo-card:nth-child(1) { animation-delay: 0.1s; }
-        .repo-card:nth-child(2) { animation-delay: 0.2s; }
-        .repo-card:nth-child(3) { animation-delay: 0.3s; }
-        .repo-card:nth-child(4) { animation-delay: 0.4s; }
-        .repo-card:nth-child(5) { animation-delay: 0.5s; }
-        .repo-card:nth-child(6) { animation-delay: 0.6s; }
+    .lang-legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
 
-        .repo-card:hover {
-            transform: translateY(-8px);
-            border-color: var(--accent-blue);
-            box-shadow: var(--shadow);
-        }
+    .lang-pct {
+        opacity: 0.7;
+    }
 
-        .repo-header {
-            display: flex;
-            align-items: start;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
+    /* Repo grid */
+    .repos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 24px;
+        margin-bottom: 40px;
+    }
 
-        .repo-icon {
-            font-size: 1.5em;
-            color: var(--text-secondary);
-            flex-shrink: 0;
-        }
+    .repo-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        animation: fadeInUp 0.6s ease-out backwards;
+    }
 
-        .repo-title {
-            flex: 1;
-        }
+    .repo-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 3px;
+        background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
 
-        .repo-name {
-            font-size: 1.3em;
-            font-weight: 700;
-            color: var(--accent-blue);
-            text-decoration: none;
-            display: block;
-            margin-bottom: 8px;
-            transition: color 0.3s ease;
-        }
+    .repo-card:hover::before { transform: scaleX(1); }
 
-        .repo-name:hover {
-            color: var(--accent-purple);
-        }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
 
-        .repo-description {
-            color: var(--text-secondary);
-            line-height: 1.6;
-            margin-bottom: 16px;
-            min-height: 48px;
-        }
+    .repo-card:nth-child(1) { animation-delay: 0.1s; }
+    .repo-card:nth-child(2) { animation-delay: 0.2s; }
+    .repo-card:nth-child(3) { animation-delay: 0.3s; }
+    .repo-card:nth-child(4) { animation-delay: 0.4s; }
+    .repo-card:nth-child(5) { animation-delay: 0.5s; }
+    .repo-card:nth-child(6) { animation-delay: 0.6s; }
 
-        .repo-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            margin-bottom: 12px;
-            font-size: 0.9em;
-        }
+    .repo-card:hover {
+        transform: translateY(-8px);
+        border-color: var(--accent-blue);
+        box-shadow: var(--shadow);
+    }
 
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--text-secondary);
-        }
+    .repo-header {
+        display: flex;
+        align-items: start;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
 
-        .language-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
+    .repo-icon {
+        font-size: 1.5em;
+        color: var(--text-secondary);
+        flex-shrink: 0;
+    }
 
-        .topics {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 12px;
-        }
+    .repo-title { flex: 1; }
 
-        .topic-tag {
-            padding: 4px 12px;
-            background: rgba(88, 166, 255, 0.1);
-            border: 1px solid rgba(88, 166, 255, 0.3);
-            border-radius: 16px;
-            font-size: 0.85em;
-            color: var(--accent-blue);
-            transition: all 0.3s ease;
-        }
+    .repo-name {
+        font-size: 1.3em;
+        font-weight: 700;
+        color: var(--accent-blue);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 8px;
+        transition: color 0.3s ease;
+    }
 
-        .topic-tag:hover {
-            background: rgba(88, 166, 255, 0.2);
-            border-color: var(--accent-blue);
-        }
+    .repo-name:hover { color: var(--accent-purple); }
 
-        .footer {
-            text-align: center;
-            margin-top: 60px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border-color);
-            color: var(--text-secondary);
-        }
+    .repo-description {
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin-bottom: 16px;
+        min-height: 48px;
+    }
 
-        .last-updated {
-            font-size: 0.9em;
-            opacity: 0.7;
-        }
+    .repo-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 12px;
+        font-size: 0.9em;
+    }
 
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: var(--text-secondary);
+    }
 
-        .spinner {
-            border: 3px solid var(--border-color);
-            border-top: 3px solid var(--accent-blue);
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
+    .language-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+    }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+    .topics {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+    }
 
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5em;
-            }
+    .topic-tag {
+        padding: 4px 12px;
+        background: rgba(88, 166, 255, 0.1);
+        border: 1px solid rgba(88, 166, 255, 0.3);
+        border-radius: 16px;
+        font-size: 0.85em;
+        color: var(--accent-blue);
+        transition: all 0.3s ease;
+    }
 
-            .repos-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    .topic-tag:hover {
+        background: rgba(88, 166, 255, 0.2);
+        border-color: var(--accent-blue);
+    }
+
+    .footer {
+        text-align: center;
+        margin-top: 60px;
+        padding-top: 40px;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+    }
+
+    .last-updated {
+        font-size: 0.9em;
+        opacity: 0.7;
+    }
+
+    @media (max-width: 768px) {
+        h1 { font-size: 2.5em; }
+        .repos-grid { grid-template-columns: 1fr; }
+    }
+</style>
 </head>
 <body>
 <div class="container">
-<header>
-<h1><i class="fab fa-github"></i> seesee010</h1>
-<p class="subtitle">Meine Pinned Projekte</p>
-<a class="github-link" href="https://github.com/seesee010" rel="noopener" target="_blank">
-<i class="fab fa-github"></i>
-                GitHub Profil besuchen
-            </a>
-</header>
-<div id="repos-container">
+    <header>
+        <h1><i class="fab fa-github"></i> seesee010</h1>
+        <p class="subtitle">Pinned Projects</p>
+        <a class="github-link" href="https://github.com/seesee010" target="_blank" rel="noopener">
+            <i class="fab fa-github"></i> Visit GitHub Profile
+        </a>
+    </header>
 
-</div></div></body>
+    <div id="repos-container">
+        <div class="lang-bar-wrapper"><div class="lang-bar"><div class="lang-segment" style="width:33.3%;background:#f34b7d" title="C++ 33%"></div><div class="lang-segment" style="width:33.3%;background:#555555" title="C 33%"></div><div class="lang-segment" style="width:16.7%;background:#000080" title="Lua 17%"></div><div class="lang-segment" style="width:16.7%;background:#58a6ff" title="Unknown 17%"></div></div><div class="lang-legend"><span class="lang-legend-item"><span class="language-dot" style="background-color:#f34b7d"></span>C++ <span class="lang-pct">33%</span></span><span class="lang-legend-item"><span class="language-dot" style="background-color:#555555"></span>C <span class="lang-pct">33%</span></span><span class="lang-legend-item"><span class="language-dot" style="background-color:#000080"></span>Lua <span class="lang-pct">17%</span></span><span class="lang-legend-item"><span class="language-dot" style="background-color:#58a6ff"></span>Unknown <span class="lang-pct">17%</span></span></div></div>
+        <div class="repos-grid">
+            
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/My-WezTerm-Config" class="repo-name" target="_blank" rel="noopener">My-WezTerm-Config</a>
+                </div>
+            </div>
+            <p class="repo-description">My whole WezTerm Config</p>
+            <div class="repo-meta">
+                <div class="meta-item"><span class="language-dot" style="background-color:#000080"></span><span>Lua</span></div>
+                <div class="meta-item"><i class="fas fa-star"></i><span>1</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/Sfml-Test0" class="repo-name" target="_blank" rel="noopener">Sfml-Test0</a>
+                </div>
+            </div>
+            <p class="repo-description">No description available</p>
+            <div class="repo-meta">
+                <div class="meta-item"><span class="language-dot" style="background-color:#f34b7d"></span><span>C++</span></div>
+                <div class="meta-item"><i class="fas fa-star"></i><span>0</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/Jiv" class="repo-name" target="_blank" rel="noopener">Jiv</a>
+                </div>
+            </div>
+            <p class="repo-description">A cli tool doing the same shit as IntelliJ would do!</p>
+            <div class="repo-meta">
+                <div class="meta-item"><span class="language-dot" style="background-color:#555555"></span><span>C</span></div>
+                <div class="meta-item"><i class="fas fa-star"></i><span>0</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/DynArray" class="repo-name" target="_blank" rel="noopener">DynArray</a>
+                </div>
+            </div>
+            <p class="repo-description">my own fany lib for dynamic arrays (void *)</p>
+            <div class="repo-meta">
+                <div class="meta-item"><span class="language-dot" style="background-color:#555555"></span><span>C</span></div>
+                <div class="meta-item"><i class="fas fa-star"></i><span>0</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/Esp32-C3-SuperMini-MQTT-BME280" class="repo-name" target="_blank" rel="noopener">Esp32-C3-SuperMini-MQTT-BME280</a>
+                </div>
+            </div>
+            <p class="repo-description">Just as the title tell</p>
+            <div class="repo-meta">
+                <div class="meta-item"><span class="language-dot" style="background-color:#f34b7d"></span><span>C++</span></div>
+                <div class="meta-item"><i class="fas fa-star"></i><span>0</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+
+        <div class="repo-card">
+            <div class="repo-header">
+                <i class="fas fa-code-branch repo-icon"></i>
+                <div class="repo-title">
+                    <a href="https://github.com/seesee010/Usb_a-to-pinhead" class="repo-name" target="_blank" rel="noopener">Usb_a-to-pinhead</a>
+                </div>
+            </div>
+            <p class="repo-description">Do not use it, it is mostly really bad designed</p>
+            <div class="repo-meta">
+                
+                <div class="meta-item"><i class="fas fa-star"></i><span>0</span></div>
+                <div class="meta-item"><i class="fas fa-code-fork"></i><span>0</span></div>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p class="last-updated" id="last-updated">Last updated: 2026-02-14 20:11 UTC</p>
+    </footer>
+</div>
+</body>
 </html>
