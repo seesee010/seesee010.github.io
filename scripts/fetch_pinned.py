@@ -1,21 +1,27 @@
 #!/usr/bin/env python3
 """
-Fetches pinned repositories from GitHub via GraphQL API,
-updates data/pinned-repos.yml, and regenerates docs/index.html.
+Fetches pinned repositories and contribution activity from GitHub via GraphQL,
+updates data files, and regenerates docs/index.html with:
+- Stats dashboard (contributions, commits, PRs, repos, stars, followers)
+- Activity area chart (365-day SVG with gray->green->red gradient)
+- Language bar
+- Pinned repo cards
 """
 
 import os
 import sys
+import json
 import yaml
 import requests
 from datetime import datetime, timezone
 from html import escape
-from collections import Counter, OrderedDict
+from collections import Counter
 
 USERNAME = "seesee010"
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 DATA_FILE = os.path.join(ROOT, "data", "pinned-repos.yml")
+ACTIVITY_FILE = os.path.join(ROOT, "data", "activity.json")
 INDEX_FILE = os.path.join(ROOT, "docs", "index.html")
 
 GRAPHQL_URL = "https://api.github.com/graphql"
@@ -39,6 +45,22 @@ query($login: String!) {
         }
       }
     }
+    contributionsCollection {
+      totalCommitContributions
+      totalPullRequestContributions
+      totalIssueContributions
+      contributionCalendar {
+        totalContributions
+        weeks {
+          contributionDays { date, contributionCount }
+        }
+      }
+    }
+    repositories(first: 100, ownerAffiliations: OWNER) {
+      totalCount
+      nodes { stargazerCount }
+    }
+    followers { totalCount }
   }
 }
 """
@@ -53,7 +75,8 @@ DEFAULT_COLORS = [
 # GitHub API
 # ---------------------------------------------------------------------------
 
-def fetch_pinned_repos(token):
+def fetch_all(token):
+    """Single GraphQL call that returns pinned repos, activity, and stats."""
     headers = {"Authorization": f"Bearer {token}"}
     resp = requests.post(
         GRAPHQL_URL,
@@ -66,17 +89,14 @@ def fetch_pinned_repos(token):
 
     if "errors" in body:
         print(f"GraphQL errors: {body['errors']}")
-        return None
+        return None, None
 
-    nodes = (
-        body.get("data", {})
-        .get("user", {})
-        .get("pinnedItems", {})
-        .get("nodes", [])
-    )
+    user = body.get("data", {}).get("user", {})
 
+    # --- Pinned repos ---
+    pinned_nodes = user.get("pinnedItems", {}).get("nodes", [])
     repos = []
-    for n in nodes:
+    for n in pinned_nodes:
         lang = n.get("primaryLanguage") or {}
         topics = [
             t["topic"]["name"]
@@ -94,11 +114,42 @@ def fetch_pinned_repos(token):
             "updated_at": n.get("updatedAt", ""),
             "topics": topics,
         })
-    return repos
+
+    # --- Activity + stats ---
+    contrib = user.get("contributionsCollection", {})
+    calendar = contrib.get("contributionCalendar", {})
+    weeks = calendar.get("weeks", [])
+
+    days = []
+    for week in weeks:
+        for day in week.get("contributionDays", []):
+            days.append({
+                "date": day["date"],
+                "count": day["contributionCount"],
+            })
+
+    repo_nodes = user.get("repositories", {}).get("nodes", [])
+    total_stars = sum(r.get("stargazerCount", 0) for r in repo_nodes)
+
+    activity = {
+        "last_updated": datetime.now(timezone.utc).isoformat(),
+        "stats": {
+            "total_contributions": calendar.get("totalContributions", 0),
+            "total_commits": contrib.get("totalCommitContributions", 0),
+            "total_prs": contrib.get("totalPullRequestContributions", 0),
+            "total_issues": contrib.get("totalIssueContributions", 0),
+            "total_repos": user.get("repositories", {}).get("totalCount", 0),
+            "total_stars": total_stars,
+            "followers": user.get("followers", {}).get("totalCount", 0),
+        },
+        "days": days,
+    }
+
+    return repos, activity
 
 
 # ---------------------------------------------------------------------------
-# YAML persistence
+# Data persistence
 # ---------------------------------------------------------------------------
 
 def save_yaml(repos, path):
@@ -120,8 +171,139 @@ def load_yaml(path):
     return data.get("repositories", [])
 
 
+def save_activity(activity, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(activity, f, indent=2)
+
+
+def load_activity(path):
+    if not os.path.isfile(path):
+        return None
+    with open(path, "r", encoding="utf-8") as f:
+        return json.load(f)
+
+
 # ---------------------------------------------------------------------------
-# HTML generation
+# SVG activity chart
+# ---------------------------------------------------------------------------
+
+def build_activity_svg(days):
+    if not days:
+        return ""
+
+    w, h = 900, 200
+    pad_l, pad_r, pad_t, pad_b = 35, 10, 15, 25
+    chart_w = w - pad_l - pad_r
+    chart_h = h - pad_t - pad_b
+
+    max_count = max(d["count"] for d in days) or 1
+    n = len(days)
+    if n < 2:
+        return ""
+
+    # Build coordinate points
+    points = []
+    for i, day in enumerate(days):
+        x = pad_l + (i / (n - 1)) * chart_w
+        y = pad_t + chart_h - (day["count"] / max_count) * chart_h
+        points.append((x, y))
+
+    baseline_y = pad_t + chart_h
+
+    # Area path (closed shape for fill)
+    area_d = f"M {pad_l},{baseline_y}"
+    for x, y in points:
+        area_d += f" L {x:.1f},{y:.1f}"
+    area_d += f" L {points[-1][0]:.1f},{baseline_y} Z"
+
+    # Line path (just the top edge)
+    line_d = f"M {points[0][0]:.1f},{points[0][1]:.1f}"
+    for x, y in points[1:]:
+        line_d += f" L {x:.1f},{y:.1f}"
+
+    # Month labels
+    month_labels = []
+    current_month = None
+    for i, day in enumerate(days):
+        m = day["date"][:7]
+        if m != current_month:
+            current_month = m
+            x = pad_l + (i / (n - 1)) * chart_w
+            label = datetime.strptime(day["date"], "%Y-%m-%d").strftime("%b")
+            month_labels.append((x, label))
+
+    # Grid lines at 25%, 50%, 75%
+    grid_lines = ""
+    for frac in (0.25, 0.5, 0.75):
+        gy = pad_t + chart_h * (1 - frac)
+        grid_lines += (
+            f'<line x1="{pad_l}" y1="{gy:.0f}" x2="{pad_l + chart_w}" '
+            f'y2="{gy:.0f}" stroke="#21262d" stroke-width="1" stroke-dasharray="4,4"/>\n'
+        )
+
+    svg = f'''<svg viewBox="0 0 {w} {h}" xmlns="http://www.w3.org/2000/svg" class="activity-chart">
+  <defs>
+    <linearGradient id="areaGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f87171" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#3fb950" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#7d8590" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f87171"/>
+      <stop offset="40%" stop-color="#3fb950"/>
+      <stop offset="100%" stop-color="#7d8590"/>
+    </linearGradient>
+  </defs>
+
+  {grid_lines}
+  <line x1="{pad_l}" y1="{baseline_y}" x2="{pad_l + chart_w}" y2="{baseline_y}" stroke="#30363d" stroke-width="1"/>
+
+  <path d="{area_d}" fill="url(#areaGrad)"/>
+  <path d="{line_d}" fill="none" stroke="url(#lineGrad)" stroke-width="1.5" stroke-linejoin="round"/>
+
+  <text x="{pad_l - 4}" y="{pad_t + 5}" text-anchor="end" fill="#7d8590" font-size="10" font-family="system-ui, sans-serif">{max_count}</text>
+  <text x="{pad_l - 4}" y="{baseline_y}" text-anchor="end" fill="#7d8590" font-size="10" font-family="system-ui, sans-serif">0</text>
+'''
+
+    for x, label in month_labels:
+        svg += f'  <text x="{x:.0f}" y="{h - 4}" text-anchor="middle" fill="#7d8590" font-size="10" font-family="system-ui, sans-serif">{label}</text>\n'
+
+    svg += '</svg>'
+    return svg
+
+
+# ---------------------------------------------------------------------------
+# Stats HTML
+# ---------------------------------------------------------------------------
+
+def build_stats_html(stats):
+    if not stats:
+        return ""
+
+    items = [
+        ("fa-calendar-check", "Contributions", stats.get("total_contributions", 0)),
+        ("fa-code-commit", "Commits", stats.get("total_commits", 0)),
+        ("fa-code-pull-request", "Pull Requests", stats.get("total_prs", 0)),
+        ("fa-book", "Repositories", stats.get("total_repos", 0)),
+        ("fa-star", "Stars Earned", stats.get("total_stars", 0)),
+        ("fa-users", "Followers", stats.get("followers", 0)),
+    ]
+
+    cards = []
+    for icon, label, value in items:
+        cards.append(
+            f'<div class="stat-card">'
+            f'<i class="fas {icon} stat-icon"></i>'
+            f'<div class="stat-value">{value}</div>'
+            f'<div class="stat-label">{label}</div>'
+            f'</div>'
+        )
+    return '<div class="stats-grid">' + "".join(cards) + '</div>'
+
+
+# ---------------------------------------------------------------------------
+# Language bar + repo cards (unchanged logic)
 # ---------------------------------------------------------------------------
 
 def build_language_bar(repos):
@@ -216,10 +398,20 @@ def build_repo_cards(repos):
     return "\n".join(cards)
 
 
-def write_index(repos, path):
+# ---------------------------------------------------------------------------
+# Full HTML generation
+# ---------------------------------------------------------------------------
+
+def write_index(repos, activity, path):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
     lang_bar = build_language_bar(repos)
     repo_cards = build_repo_cards(repos)
+
+    stats_html = ""
+    chart_html = ""
+    if activity:
+        stats_html = build_stats_html(activity.get("stats"))
+        chart_html = build_activity_svg(activity.get("days", []))
 
     html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -280,7 +472,7 @@ def write_index(repos, path):
 
     header {{
         text-align: center;
-        margin-bottom: 60px;
+        margin-bottom: 48px;
         animation: fadeInDown 0.8s ease-out;
     }}
 
@@ -324,6 +516,80 @@ def write_index(repos, path):
         border-color: var(--accent-blue);
         box-shadow: 0 0 20px rgba(88, 166, 255, 0.3);
         transform: translateY(-2px);
+    }}
+
+    /* Section titles */
+    .section-title {{
+        font-size: 1.3em;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }}
+
+    .section-title i {{
+        color: var(--accent-blue);
+        font-size: 0.9em;
+    }}
+
+    /* Stats grid */
+    .stats-grid {{
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 16px;
+        margin-bottom: 40px;
+    }}
+
+    .stat-card {{
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 20px 16px;
+        text-align: center;
+        transition: all 0.3s ease;
+    }}
+
+    .stat-card:hover {{
+        border-color: var(--accent-blue);
+        transform: translateY(-4px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }}
+
+    .stat-icon {{
+        font-size: 1.4em;
+        color: var(--accent-blue);
+        margin-bottom: 8px;
+    }}
+
+    .stat-value {{
+        font-size: 1.8em;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.2;
+    }}
+
+    .stat-label {{
+        font-size: 0.8em;
+        color: var(--text-secondary);
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }}
+
+    /* Activity chart */
+    .activity-section {{
+        margin-bottom: 40px;
+    }}
+
+    .activity-chart {{
+        width: 100%;
+        height: auto;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        padding: 4px;
     }}
 
     /* Language bar */
@@ -509,6 +775,11 @@ def write_index(repos, path):
     @media (max-width: 768px) {{
         h1 {{ font-size: 2.5em; }}
         .repos-grid {{ grid-template-columns: 1fr; }}
+        .stats-grid {{ grid-template-columns: repeat(3, 1fr); }}
+    }}
+
+    @media (max-width: 480px) {{
+        .stats-grid {{ grid-template-columns: repeat(2, 1fr); }}
     }}
 </style>
 </head>
@@ -522,8 +793,19 @@ def write_index(repos, path):
         </a>
     </header>
 
+    {f'''<section>
+        <h2 class="section-title"><i class="fas fa-chart-bar"></i> Year in Review</h2>
+        {stats_html}
+    </section>''' if stats_html else ''}
+
+    {f'''<section class="activity-section">
+        <h2 class="section-title"><i class="fas fa-chart-line"></i> Contribution Activity</h2>
+        {chart_html}
+    </section>''' if chart_html else ''}
+
     <div id="repos-container">
         {lang_bar}
+        <h2 class="section-title"><i class="fas fa-thumbtack"></i> Pinned Repositories</h2>
         <div class="repos-grid">
             {repo_cards}
         </div>
@@ -549,24 +831,33 @@ def main():
     token = os.environ.get("GITHUB_TOKEN")
 
     repos = None
+    activity = None
+
     if token:
-        print(f"Fetching pinned repos for {USERNAME} via GraphQL...")
-        repos = fetch_pinned_repos(token)
+        print(f"Fetching data for {USERNAME} via GraphQL...")
+        repos, activity = fetch_all(token)
         if repos is not None:
             print(f"Fetched {len(repos)} pinned repos.")
             save_yaml(repos, DATA_FILE)
         else:
-            print("GraphQL fetch failed, falling back to cached YAML.")
+            print("GraphQL fetch failed, falling back to cached data.")
+        if activity is not None:
+            print(f"Fetched {len(activity.get('days', []))} days of activity.")
+            save_activity(activity, ACTIVITY_FILE)
 
     if repos is None:
         print("Loading repos from cached YAML...")
         repos = load_yaml(DATA_FILE)
 
+    if activity is None:
+        print("Loading activity from cached JSON...")
+        activity = load_activity(ACTIVITY_FILE)
+
     if not repos:
         print("No repos found. Nothing to do.")
         sys.exit(0)
 
-    write_index(repos, INDEX_FILE)
+    write_index(repos, activity, INDEX_FILE)
     print(f"Generated {INDEX_FILE} with {len(repos)} repos.")
 
 
