@@ -1,63 +1,109 @@
-last_updated: '2026-02-17T02:05:56.489761+00:00'
+last_updated: '2026-02-18T02:09:52.266309+00:00'
 username: seesee010
 repositories:
 - name: Sfml-Test0
-  description: null
+  description: This is my learning journey of graphical APIs, - SFML is a graphic
+    lib, which is designed to simplify OpenGL. It only supports 2D, where 3D logic
+    must came from the program
   url: https://github.com/seesee010/Sfml-Test0
   stars: 0
   forks: 0
   language: C++
   language_color: '#f34b7d'
   homepage: ''
-  updated_at: '2025-11-01T19:43:50Z'
-  topics: []
+  updated_at: '2026-02-18T00:57:42Z'
+  topics:
+  - 2d
+  - cpp
+  - gamedev
+  - graphics-programming
+  - learning-journey
+  - opengl
+  - sfml
 - name: Jiv
-  description: A cli tool doing the same shit as IntelliJ would do!
+  description: I personaly hate InteliJ, and so I created a cli tool, which can also
+    create a parent dir and a child dir called `src`, - you know... normal InteliJ
+    stuff. All with one single command!
   url: https://github.com/seesee010/Jiv
   stars: 0
   forks: 0
   language: C
   language_color: '#555555'
   homepage: ''
-  updated_at: '2026-02-09T16:41:34Z'
-  topics: []
+  updated_at: '2026-02-18T01:51:45Z'
+  topics:
+  - automation
+  - c
+  - cli
+  - devtools
+  - intellij
+  - productivity
+  - scaffolding
+  - utility
 - name: DynArray
-  description: my own fany lib for dynamic arrays (void *)
+  description: I wondered about how dynamic Arrays worked and this lib is just my
+    own dynamic Array called `DynArray` - I know... that is a really good naming.
   url: https://github.com/seesee010/DynArray
   stars: 0
   forks: 0
   language: C
   language_color: '#555555'
   homepage: ''
-  updated_at: '2025-12-17T07:15:54Z'
-  topics: []
+  updated_at: '2026-02-18T00:55:16Z'
+  topics:
+  - algorithms
+  - c
+  - data-structures
+  - dynamic-array
+  - education
+  - library
+  - memory-management
 - name: Esp32-C3-SuperMini-MQTT-BME280
-  description: Just as the title tell
+  description: My own Esp32-C3-Super-Mini + BME280 + MQTT lib, because I needed something
+    reliable. In my opinion it is really simple to use!
   url: https://github.com/seesee010/Esp32-C3-SuperMini-MQTT-BME280
   stars: 0
   forks: 0
   language: C++
   language_color: '#f34b7d'
   homepage: ''
-  updated_at: '2026-01-31T19:44:39Z'
-  topics: []
+  updated_at: '2026-02-18T01:53:06Z'
+  topics:
+  - arduino
+  - bme280
+  - cpp
+  - embedded
+  - esp32-c3
+  - esp32-c3-super-mini
+  - home-automation
+  - iot
+  - mqtt
 - name: oon-TradingBot
   description: trading bot for oön trading game
   url: https://github.com/Gretoffel/oon-TradingBot
+  stars: 0
+  forks: 0
+  language: Python
+  language_color: '#3572A5'
+  homepage: ''
+  updated_at: '2026-02-18T01:59:22Z'
+  topics: []
+- name: Email-Labeling-AI
+  description: This project is an EMAIL labeling program, you can start the program
+    (dont forget the right setup for config.yml) and then it will fetch all emails
+    from today and will search your labels (gmail) and OpenAI API will order them
+    into the right place (hopefully). IMAP BTW
+  url: https://github.com/seesee010/Email-Labeling-AI
   stars: 1
   forks: 0
   language: Python
   language_color: '#3572A5'
   homepage: ''
-  updated_at: '2026-02-13T10:49:29Z'
-  topics: []
-- name: hidder
-  description: Like git but only for hidding stuff
-  url: https://github.com/seesee010/hidder
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-02-15T20:49:43Z'
-  topics: []
+  updated_at: '2026-02-18T01:25:58Z'
+  topics:
+  - ai-classifier
+  - email-automation
+  - imap
+  - openai-api
+  - pruductivity
+  - pyhton
