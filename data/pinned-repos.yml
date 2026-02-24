@@ -1,25 +1,6 @@
-last_updated: '2026-02-23T02:09:08.221508+00:00'
+last_updated: '2026-02-24T02:06:01.530740+00:00'
 username: seesee010
 repositories:
-- name: Sfml-Test0
-  description: This is my learning journey of graphical APIs, - SFML is a graphic
-    lib, which is designed to simplify OpenGL. It only supports 2D, where 3D logic
-    must came from the program
-  url: https://github.com/seesee010/Sfml-Test0
-  stars: 0
-  forks: 0
-  language: C++
-  language_color: '#f34b7d'
-  homepage: ''
-  updated_at: '2026-02-18T00:57:42Z'
-  topics:
-  - 2d
-  - cpp
-  - gamedev
-  - graphics-programming
-  - learning-journey
-  - opengl
-  - sfml
 - name: Jiv
   description: I personaly hate InteliJ, and so I created a cli tool, which can also
     create a parent dir and a child dir called `src`, - you know... normal InteliJ
@@ -86,8 +67,14 @@ repositories:
   language: Python
   language_color: '#3572A5'
   homepage: ''
-  updated_at: '2026-02-22T20:36:50Z'
-  topics: []
+  updated_at: '2026-02-23T07:14:18Z'
+  topics:
+  - ai-driven
+  - automation
+  - python
+  - streamlit
+  - trading
+  - vibecoding
 - name: Email-Labeling-AI
   description: This project is an EMAIL labeling program, you can start the program
     (dont forget the right setup for config.yml) and then it will fetch all emails
@@ -107,3 +94,23 @@ repositories:
   - openai-api
   - pruductivity
   - pyhton
+- name: hidder
+  description: Did you ever wish to have credentials, which you can push without worrying
+    or creating a seperated file like config.yml.example. With the cli tool `hidder`
+    worrying or seperated example files are now over! Now you can just hide special
+    lines from pushing and then restore them!
+  url: https://github.com/seesee010/hidder
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: ''
+  updated_at: '2026-02-18T01:56:02Z'
+  topics:
+  - c
+  - cli
+  - devops
+  - git-tools
+  - privacy
+  - secrets-management
+  - security
