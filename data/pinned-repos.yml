@@ -1,4 +1,4 @@
-last_updated: '2026-03-01T02:22:17.969987+00:00'
+last_updated: '2026-03-02T02:06:02.157636+00:00'
 username: seesee010
 repositories:
 - name: Jiv
@@ -39,26 +39,6 @@ repositories:
   - education
   - library
   - memory-management
-- name: hidder
-  description: Did you ever wish to have credentials, which you can push without worrying
-    or creating a seperated file like config.yml.example. With the cli tool `hidder`
-    worrying or seperated example files are now over! Now you can just hide special
-    lines from pushing and then restore them!
-  url: https://github.com/seesee010/hidder
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-02-24T11:28:09Z'
-  topics:
-  - c
-  - cli
-  - devops
-  - git-tools
-  - privacy
-  - secrets-management
-  - security
 - name: oon-TradingBot
   description: trading bot for oön trading game
   url: https://github.com/Gretoffel/oon-TradingBot
@@ -75,3 +55,42 @@ repositories:
   - streamlit
   - trading
   - vibecoding
+- name: Email-Labeling-AI
+  description: This project is an EMAIL labeling program, you can start the program
+    (dont forget the right setup for config.yml) and then it will fetch all emails
+    from today and will search your labels (gmail) and OpenAI API will order them
+    into the right place (hopefully). IMAP BTW
+  url: https://github.com/seesee010/Email-Labeling-AI
+  stars: 0
+  forks: 0
+  language: Python
+  language_color: '#3572A5'
+  homepage: ''
+  updated_at: '2026-02-18T02:11:58Z'
+  topics:
+  - ai-classifier
+  - email-automation
+  - imap
+  - openai-api
+  - pruductivity
+  - pyhton
+- name: Esp32-C3-SuperMini-MQTT-BME280
+  description: My own Esp32-C3-Super-Mini + BME280 + MQTT lib, because I needed something
+    reliable. In my opinion it is really simple to use!
+  url: https://github.com/seesee010/Esp32-C3-SuperMini-MQTT-BME280
+  stars: 0
+  forks: 0
+  language: C++
+  language_color: '#f34b7d'
+  homepage: ''
+  updated_at: '2026-02-22T20:34:11Z'
+  topics:
+  - arduino
+  - bme280
+  - cpp
+  - embedded
+  - esp32-c3
+  - esp32-c3-super-mini
+  - home-automation
+  - iot
+  - mqtt
