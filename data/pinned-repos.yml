@@ -1,4 +1,4 @@
-last_updated: '2026-03-03T02:07:49.591400+00:00'
+last_updated: '2026-03-04T02:01:28.130321+00:00'
 username: seesee010
 repositories:
 - name: Jiv
@@ -94,3 +94,23 @@ repositories:
   - home-automation
   - iot
   - mqtt
+- name: Temp-Project
+  description: This is currently my private project
+  url: https://github.com/seesee010/Temp-Project
+  stars: 1
+  forks: 0
+  language: null
+  language_color: null
+  homepage: ''
+  updated_at: '2026-03-02T11:55:18Z'
+  topics:
+  - gerber
+  - gerber-files
+  - i2c
+  - i2c-sensor
+  - kicad
+  - openscad
+  - pcb
+  - sensor
+  - spi
+  - spi-display
