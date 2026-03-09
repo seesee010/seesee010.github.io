@@ -1,26 +1,6 @@
-last_updated: '2026-03-08T02:06:18.738618+00:00'
+last_updated: '2026-03-09T02:07:34.249329+00:00'
 username: seesee010
 repositories:
-- name: Jiv
-  description: I personaly hate InteliJ, and so I created a cli tool, which can also
-    create a parent dir and a child dir called `src`, - you know... normal InteliJ
-    stuff. All with one single command!
-  url: https://github.com/seesee010/Jiv
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-02-18T01:51:45Z'
-  topics:
-  - automation
-  - c
-  - cli
-  - devtools
-  - intellij
-  - productivity
-  - scaffolding
-  - utility
 - name: DynArray
   description: I wondered about how dynamic Arrays worked and this lib is just my
     own dynamic Array called `DynArray` - I know... that is a really good naming.
@@ -55,25 +35,6 @@ repositories:
   - streamlit
   - trading
   - vibecoding
-- name: Email-Labeling-AI
-  description: This project is an EMAIL labeling program, you can start the program
-    (dont forget the right setup for config.yml) and then it will fetch all emails
-    from today and will search your labels (gmail) and OpenAI API will order them
-    into the right place (hopefully). IMAP BTW
-  url: https://github.com/seesee010/Email-Labeling-AI
-  stars: 0
-  forks: 0
-  language: Python
-  language_color: '#3572A5'
-  homepage: ''
-  updated_at: '2026-02-18T02:11:58Z'
-  topics:
-  - ai-classifier
-  - email-automation
-  - imap
-  - openai-api
-  - pruductivity
-  - pyhton
 - name: Esp32-C3-SuperMini-MQTT-BME280
   description: My own Esp32-C3-Super-Mini + BME280 + MQTT lib, because I needed something
     reliable. In my opinion it is really simple to use!
@@ -97,12 +58,12 @@ repositories:
 - name: Temp-Project
   description: A PCB Project, from pcb to C - all without any libs
   url: https://github.com/seesee010/Temp-Project
-  stars: 1
+  stars: 0
   forks: 0
-  language: null
-  language_color: null
+  language: Prolog
+  language_color: '#74283c'
   homepage: ''
-  updated_at: '2026-03-06T16:49:53Z'
+  updated_at: '2026-03-09T01:05:02Z'
   topics:
   - gerber
   - gerber-files
@@ -114,3 +75,40 @@ repositories:
   - sensor
   - spi
   - spi-display
+- name: Usb_a-to-pinhead
+  description: 'This is my third try of making a pcb. The intention was to create
+    an USB-A female to Pinhead male adapter - Just for fun... '
+  url: https://github.com/seesee010/Usb_a-to-pinhead
+  stars: 0
+  forks: 0
+  language: null
+  language_color: null
+  homepage: ''
+  updated_at: '2026-03-09T01:19:23Z'
+  topics:
+  - breakout-board
+  - electronics
+  - hardware
+  - kicad
+  - learning-by-doing
+  - pcb
+  - pcb-design
+  - usb
+- name: mFISR
+  description: My own lib for the known `fast-inverse-square-root` made fully in x86-64
+    intel ASM with an C header for the C guys out there. Enjoy it!
+  url: https://github.com/seesee010/mFISR
+  stars: 0
+  forks: 0
+  language: Assembly
+  language_color: '#6E4C13'
+  homepage: ''
+  updated_at: '2026-03-08T19:58:08Z'
+  topics:
+  - c
+  - fast-inverse-square-root
+  - lib
+  - x86-64-assembly
+  - c-header-file
+  - math
+  - mathematics
