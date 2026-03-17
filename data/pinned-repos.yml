@@ -1,17 +1,17 @@
-last_updated: '2026-03-16T02:27:18.342396+00:00'
+last_updated: '2026-03-17T02:06:17.054097+00:00'
 username: seesee010
 repositories:
-- name: Temp-Project
+- name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
     the sensor) and to show them on screen (per spi). Sensor is speaking per i2c'
-  url: https://github.com/seesee010/Temp-Project
+  url: https://github.com/seesee010/stm32-lcd-thermometer
   stars: 0
   forks: 0
-  language: null
-  language_color: null
+  language: KiCad Layout
+  language_color: '#2f4aab'
   homepage: ''
-  updated_at: '2026-03-15T23:38:31Z'
+  updated_at: '2026-03-16T18:50:21Z'
   topics:
   - gerber
   - gerber-files
@@ -32,7 +32,7 @@ repositories:
   language: C++
   language_color: '#f34b7d'
   homepage: ''
-  updated_at: '2026-03-15T23:10:31Z'
+  updated_at: '2026-03-16T17:34:13Z'
   topics:
   - arduino
   - bme280
