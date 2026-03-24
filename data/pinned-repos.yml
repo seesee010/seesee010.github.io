@@ -1,4 +1,4 @@
-last_updated: '2026-03-23T02:12:38.130059+00:00'
+last_updated: '2026-03-24T02:04:57.374177+00:00'
 username: seesee010
 repositories:
 - name: stm32-lcd-thermometer
@@ -77,3 +77,23 @@ repositories:
   - streamlit
   - trading
   - vibecoding
+- name: Jiv
+  description: I personaly hate InteliJ, and so I created a cli tool, which can also
+    create a parent dir and a child dir called `src`, - you know... normal InteliJ
+    stuff. All with one single command!
+  url: https://github.com/seesee010/Jiv
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: ''
+  updated_at: '2026-02-18T01:51:45Z'
+  topics:
+  - automation
+  - c
+  - cli
+  - devtools
+  - intellij
+  - productivity
+  - scaffolding
+  - utility
