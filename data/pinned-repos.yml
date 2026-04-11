@@ -1,6 +1,26 @@
-last_updated: '2026-04-10T02:33:34.944291+00:00'
+last_updated: '2026-04-11T02:12:07.541346+00:00'
 username: seesee010
 repositories:
+- name: lo3-core
+  description: This is my own programming language. Parser is coded in C and tests
+    are written in Python / C. I hope you can acomplish something like interest in
+    that project. You asm guys will notice that there are a lot of similars to the
+    "real asm". Code is structured like on x86, but i am using intel and both atnt
+    features at once. Check it out!
+  url: https://github.com/lo3-lang/lo3-core
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: ''
+  updated_at: '2026-04-10T15:58:40Z'
+  topics:
+  - c
+  - cmake
+  - language
+  - makefile
+  - lo3-lang
+  - cli
 - name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
@@ -61,22 +81,6 @@ repositories:
   - education
   - library
   - memory-management
-- name: oon-TradingBot
-  description: trading bot for oön trading game
-  url: https://github.com/Gretoffel/oon-TradingBot
-  stars: 0
-  forks: 0
-  language: Python
-  language_color: '#3572A5'
-  homepage: ''
-  updated_at: '2026-02-25T06:33:19Z'
-  topics:
-  - ai-driven
-  - automation
-  - python
-  - streamlit
-  - trading
-  - vibecoding
 - name: Jiv
   description: I personaly hate InteliJ, and so I created a cli tool, which can also
     create a parent dir and a child dir called `src`, - you know... normal InteliJ
@@ -97,3 +101,19 @@ repositories:
   - productivity
   - scaffolding
   - utility
+- name: oon-TradingBot
+  description: trading bot for oön trading game
+  url: https://github.com/Gretoffel/oon-TradingBot
+  stars: 0
+  forks: 0
+  language: Python
+  language_color: '#3572A5'
+  homepage: ''
+  updated_at: '2026-02-25T06:33:19Z'
+  topics:
+  - ai-driven
+  - automation
+  - python
+  - streamlit
+  - trading
+  - vibecoding
