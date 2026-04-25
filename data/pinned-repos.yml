@@ -1,4 +1,4 @@
-last_updated: '2026-04-24T02:37:46.555609+00:00'
+last_updated: '2026-04-25T02:27:24.760429+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -13,7 +13,7 @@ repositories:
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-04-23T14:34:04Z'
+  updated_at: '2026-04-24T22:37:10Z'
   topics:
   - c
   - cmake
@@ -21,6 +21,7 @@ repositories:
   - makefile
   - lo3-lang
   - cli
+  - lo3
 - name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
