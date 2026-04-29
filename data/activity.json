@@ -1,8 +1,8 @@
 {
-  "last_updated": "2026-04-29T02:51:46.414504+00:00",
+  "last_updated": "2026-04-29T05:40:22.509945+00:00",
   "stats": {
-    "total_contributions": 963,
-    "total_commits": 617,
+    "total_contributions": 965,
+    "total_commits": 619,
     "total_prs": 78,
     "total_issues": 100,
     "total_repos": 31,
@@ -1480,7 +1480,89 @@
     },
     {
       "date": "2026-04-29",
-      "count": 0
+      "count": 2
+    }
+  ],
+  "all_repo_languages": [
+    {
+      "language": "Lua",
+      "language_color": "#000080"
+    },
+    {
+      "language": "C++",
+      "language_color": "#f34b7d"
+    },
+    {
+      "language": "C",
+      "language_color": "#555555"
+    },
+    {
+      "language": "C",
+      "language_color": "#555555"
+    },
+    {
+      "language": "C++",
+      "language_color": "#f34b7d"
+    },
+    {
+      "language": "C++",
+      "language_color": "#f34b7d"
+    },
+    {
+      "language": "C",
+      "language_color": "#555555"
+    },
+    {
+      "language": "Python",
+      "language_color": "#3572A5"
+    },
+    {
+      "language": "Python",
+      "language_color": "#3572A5"
+    },
+    {
+      "language": "C",
+      "language_color": "#555555"
+    },
+    {
+      "language": "Shell",
+      "language_color": "#89e051"
+    },
+    {
+      "language": "KiCad Layout",
+      "language_color": "#2f4aab"
+    },
+    {
+      "language": "Assembly",
+      "language_color": "#6E4C13"
+    },
+    {
+      "language": "Python",
+      "language_color": "#3572A5"
+    },
+    {
+      "language": "Lua",
+      "language_color": "#000080"
+    },
+    {
+      "language": "JavaScript",
+      "language_color": "#f1e05a"
+    },
+    {
+      "language": "JavaScript",
+      "language_color": "#f1e05a"
+    },
+    {
+      "language": "Verilog",
+      "language_color": "#b2b7f8"
+    },
+    {
+      "language": "C",
+      "language_color": "#555555"
+    },
+    {
+      "language": "Rust",
+      "language_color": "#dea584"
     }
   ]
 }
