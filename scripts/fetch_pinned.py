@@ -4,7 +4,7 @@ Fetches pinned repositories and contribution activity from GitHub via GraphQL,
 updates data files, and regenerates docs/index.html with:
 - Stats dashboard (contributions, commits, PRs, repos, stars, followers)
 - Activity area chart (365-day SVG with gray->green->red gradient)
-- Language bar
+- Language bar (based on ALL repositories, not just pinned ones)
 - Pinned repo cards
 """
 
@@ -58,7 +58,10 @@ query($login: String!) {
     }
     repositories(first: 100, ownerAffiliations: OWNER) {
       totalCount
-      nodes { stargazerCount }
+      nodes {
+        stargazerCount
+        primaryLanguage { name color }
+      }
     }
     followers { totalCount }
   }
@@ -128,8 +131,18 @@ def fetch_all(token):
                 "count": day["contributionCount"],
             })
 
+    # --- All-repo language data (for the language bar) ---
     repo_nodes = user.get("repositories", {}).get("nodes", [])
     total_stars = sum(r.get("stargazerCount", 0) for r in repo_nodes)
+
+    all_repo_languages = []
+    for r in repo_nodes:
+        lang = r.get("primaryLanguage") or {}
+        if lang.get("name"):
+            all_repo_languages.append({
+                "language": lang["name"],
+                "language_color": lang.get("color") or "#858585",
+            })
 
     activity = {
         "last_updated": datetime.now(timezone.utc).isoformat(),
@@ -143,6 +156,8 @@ def fetch_all(token):
             "followers": user.get("followers", {}).get("totalCount", 0),
         },
         "days": days,
+        # Stored so the language bar survives cache hits too
+        "all_repo_languages": all_repo_languages,
     }
 
     return repos, activity
@@ -303,16 +318,21 @@ def build_stats_html(stats):
 
 
 # ---------------------------------------------------------------------------
-# Language bar + repo cards (unchanged logic)
+# Language bar
 # ---------------------------------------------------------------------------
 
-def build_language_bar(repos):
+def build_language_bar(lang_entries):
+    """
+    lang_entries: list of dicts with keys 'language' and 'language_color'.
+    Uses ALL repo entries so the bar reflects the full account, not just pinned repos.
+    """
     counts = Counter()
     color_map = {}
-    for r in repos:
-        lang = r.get("language") or "Unknown"
+
+    for entry in lang_entries:
+        lang = entry.get("language") or "Unknown"
         counts[lang] += 1
-        lc = r.get("language_color")
+        lc = entry.get("language_color")
         if lc:
             color_map[lang] = lc
 
@@ -352,6 +372,10 @@ def build_language_bar(repos):
         '</div>'
     )
 
+
+# ---------------------------------------------------------------------------
+# Repo cards
+# ---------------------------------------------------------------------------
 
 def build_repo_cards(repos):
     cards = []
@@ -404,7 +428,20 @@ def build_repo_cards(repos):
 
 def write_index(repos, activity, path):
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
-    lang_bar = build_language_bar(repos)
+
+    # Language bar: prefer all-repo data from activity; fall back to pinned repos
+    all_lang_entries = []
+    if activity and activity.get("all_repo_languages"):
+        all_lang_entries = activity["all_repo_languages"]
+    else:
+        # Legacy fallback: build from pinned repos only
+        all_lang_entries = [
+            {"language": r.get("language"), "language_color": r.get("language_color")}
+            for r in repos
+            if r.get("language")
+        ]
+
+    lang_bar = build_language_bar(all_lang_entries)
     repo_cards = build_repo_cards(repos)
 
     stats_html = ""
@@ -518,7 +555,6 @@ def write_index(repos, activity, path):
         transform: translateY(-2px);
     }}
 
-    /* Section titles */
     .section-title {{
         font-size: 1.3em;
         font-weight: 600;
@@ -534,7 +570,6 @@ def write_index(repos, activity, path):
         font-size: 0.9em;
     }}
 
-    /* Stats grid */
     .stats-grid {{
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -578,7 +613,6 @@ def write_index(repos, activity, path):
         letter-spacing: 0.5px;
     }}
 
-    /* Activity chart */
     .activity-section {{
         margin-bottom: 40px;
     }}
@@ -592,7 +626,6 @@ def write_index(repos, activity, path):
         padding: 4px;
     }}
 
-    /* Language bar */
     .lang-bar-wrapper {{
         margin-bottom: 32px;
     }}
@@ -633,7 +666,6 @@ def write_index(repos, activity, path):
         opacity: 0.7;
     }}
 
-    /* Repo grid */
     .repos-grid {{
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -842,7 +874,8 @@ def main():
         else:
             print("GraphQL fetch failed, falling back to cached data.")
         if activity is not None:
-            print(f"Fetched {len(activity.get('days', []))} days of activity.")
+            lang_count = len(activity.get("all_repo_languages", []))
+            print(f"Fetched {len(activity.get('days', []))} days of activity, {lang_count} repo language entries.")
             save_activity(activity, ACTIVITY_FILE)
 
     if repos is None:
