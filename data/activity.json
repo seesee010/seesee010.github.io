@@ -1,11 +1,11 @@
 {
-  "last_updated": "2026-05-21T03:39:46.157146+00:00",
+  "last_updated": "2026-05-22T03:38:14.692812+00:00",
   "stats": {
     "total_contributions": 1119,
-    "total_commits": 716,
+    "total_commits": 699,
     "total_prs": 97,
     "total_issues": 115,
-    "total_repos": 38,
+    "total_repos": 37,
     "total_stars": 1,
     "followers": 8
   },
@@ -1448,7 +1448,7 @@
     },
     {
       "date": "2026-05-12",
-      "count": 12
+      "count": 11
     },
     {
       "date": "2026-05-13",
@@ -1484,6 +1484,10 @@
     },
     {
       "date": "2026-05-21",
+      "count": 1
+    },
+    {
+      "date": "2026-05-22",
       "count": 0
     }
   ],
@@ -1575,10 +1579,6 @@
     {
       "language": "C",
       "language_color": "#555555"
-    },
-    {
-      "language": "Java",
-      "language_color": "#b07219"
     },
     {
       "language": "JavaScript",
