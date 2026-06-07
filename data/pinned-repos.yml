@@ -1,4 +1,4 @@
-last_updated: '2026-06-06T03:28:15.101102+00:00'
+last_updated: '2026-06-07T03:54:36.711135+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -82,26 +82,6 @@ repositories:
   - home-automation
   - iot
   - mqtt
-- name: Jiv
-  description: I personaly hate InteliJ, and so I created a cli tool, which can also
-    create a parent dir and a child dir called `src`, - you know... normal InteliJ
-    stuff. All with one single command!
-  url: https://github.com/seesee010/Jiv
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-02-18T01:51:45Z'
-  topics:
-  - automation
-  - c
-  - cli
-  - devtools
-  - intellij
-  - productivity
-  - scaffolding
-  - utility
 - name: oon-TradingBot
   description: trading bot for oön trading game
   url: https://github.com/Gretoffel/oon-TradingBot
