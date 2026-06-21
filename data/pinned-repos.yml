@@ -1,19 +1,17 @@
-last_updated: '2026-06-20T03:38:12.957248+00:00'
+last_updated: '2026-06-21T04:11:16.743047+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
   description: This is my own programming language. Parser is coded in C and tests
-    are written in Python / C. I hope you can acomplish something like interest in
-    that project. You asm guys will notice that there are a lot of similars to the
-    "real asm". Code is structured like on x86, but i am using intel and both atnt
-    features at once. Check it out!
+    are written in Python / C. Code is structured like on x86, but i am using intel
+    and both atnt features at once. Check it out!
   url: https://github.com/lo3-lang/lo3-core
   stars: 0
   forks: 2
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-06-14T23:45:28Z'
+  updated_at: '2026-06-20T18:35:15Z'
   topics:
   - c
   - cmake
