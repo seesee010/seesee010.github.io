@@ -1,4 +1,4 @@
-last_updated: '2026-06-26T03:39:07.879166+00:00'
+last_updated: '2026-06-27T03:25:16.850671+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -96,3 +96,13 @@ repositories:
   - streamlit
   - trading
   - vibecoding
+- name: cy
+  description: A compiled language... c kisses python - my way WIP
+  url: https://github.com/seesee010/cy
+  stars: 0
+  forks: 0
+  language: C
+  language_color: '#555555'
+  homepage: ''
+  updated_at: '2026-06-26T15:18:59Z'
+  topics: []
