@@ -1,4 +1,4 @@
-last_updated: '2026-06-27T03:25:16.850671+00:00'
+last_updated: '2026-06-28T03:47:16.482717+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -11,7 +11,7 @@ repositories:
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-06-20T18:35:15Z'
+  updated_at: '2026-06-27T14:43:20Z'
   topics:
   - c
   - cmake
