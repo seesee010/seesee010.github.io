@@ -1,4 +1,4 @@
-last_updated: '2026-07-06T03:29:48.348933+00:00'
+last_updated: '2026-07-07T03:20:11.735598+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -7,11 +7,11 @@ repositories:
     and both atnt features at once. Check it out!
   url: https://github.com/lo3-lang/lo3-core
   stars: 0
-  forks: 2
+  forks: 3
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-06-27T14:43:20Z'
+  updated_at: '2026-07-06T23:32:58Z'
   topics:
   - c
   - cmake
@@ -96,13 +96,3 @@ repositories:
   - streamlit
   - trading
   - vibecoding
-- name: cy
-  description: A compiled language... c kisses python - my way WIP
-  url: https://github.com/seesee010/cy
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-06-26T15:18:59Z'
-  topics: []
