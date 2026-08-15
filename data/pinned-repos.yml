@@ -1,4 +1,4 @@
-last_updated: '2026-08-14T01:52:22.724841+00:00'
+last_updated: '2026-08-15T01:10:34.906030+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -11,7 +11,7 @@ repositories:
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-08-12T04:58:39Z'
+  updated_at: '2026-08-15T00:44:56Z'
   topics:
   - c
   - cmake
@@ -20,6 +20,46 @@ repositories:
   - lo3-lang
   - cli
   - lo3
+- name: Esp32-MQTT-BME280
+  description: My own Esp32-C3-Super-Mini + BME280 + MQTT project, because I needed
+    something reliable. In my opinion it is really simple to use!
+  url: https://github.com/seesee010/Esp32-MQTT-BME280
+  stars: 0
+  forks: 0
+  language: C++
+  language_color: '#f34b7d'
+  homepage: ''
+  updated_at: '2026-03-19T06:41:00Z'
+  topics:
+  - arduino
+  - bme280
+  - cpp
+  - embedded
+  - esp32-c3
+  - esp32-c3-super-mini
+  - home-automation
+  - iot
+  - mqtt
+- name: dotfiles
+  description: My dotfiles, from ~/
+  url: https://github.com/seesee010/dotfiles
+  stars: 0
+  forks: 0
+  language: Lua
+  language_color: '#000080'
+  homepage: ''
+  updated_at: '2026-08-15T00:51:51Z'
+  topics:
+  - bash
+  - bashrc
+  - dotfile
+  - dotfiles
+  - dotfiles-linux
+  - konsole
+  - konsole-color-schemes
+  - nvim
+  - nvim-config
+  - nvim-configs
 - name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
@@ -42,6 +82,22 @@ repositories:
   - sensor
   - spi
   - spi-display
+- name: oon-TradingBot
+  description: trading bot for oön trading game
+  url: https://github.com/Gretoffel/oon-TradingBot
+  stars: 0
+  forks: 0
+  language: Python
+  language_color: '#3572A5'
+  homepage: ''
+  updated_at: '2026-02-25T06:33:19Z'
+  topics:
+  - ai-driven
+  - automation
+  - python
+  - streamlit
+  - trading
+  - vibecoding
 - name: DynArray
   description: I wondered about how dynamic Arrays worked and this lib is just my
     own dynamic Array called `DynArray`
@@ -60,39 +116,3 @@ repositories:
   - education
   - library
   - memory-management
-- name: Esp32-MQTT-BME280
-  description: My own Esp32-C3-Super-Mini + BME280 + MQTT project, because I needed
-    something reliable. In my opinion it is really simple to use!
-  url: https://github.com/seesee010/Esp32-MQTT-BME280
-  stars: 0
-  forks: 0
-  language: C++
-  language_color: '#f34b7d'
-  homepage: ''
-  updated_at: '2026-03-19T06:41:00Z'
-  topics:
-  - arduino
-  - bme280
-  - cpp
-  - embedded
-  - esp32-c3
-  - esp32-c3-super-mini
-  - home-automation
-  - iot
-  - mqtt
-- name: oon-TradingBot
-  description: trading bot for oön trading game
-  url: https://github.com/Gretoffel/oon-TradingBot
-  stars: 0
-  forks: 0
-  language: Python
-  language_color: '#3572A5'
-  homepage: ''
-  updated_at: '2026-02-25T06:33:19Z'
-  topics:
-  - ai-driven
-  - automation
-  - python
-  - streamlit
-  - trading
-  - vibecoding
