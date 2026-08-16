@@ -1,4 +1,4 @@
-last_updated: '2026-08-15T01:10:34.906030+00:00'
+last_updated: '2026-08-16T01:14:20.248092+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -20,6 +20,26 @@ repositories:
   - lo3-lang
   - cli
   - lo3
+- name: dotfiles
+  description: My dotfiles, from ~/
+  url: https://github.com/seesee010/dotfiles
+  stars: 0
+  forks: 0
+  language: Lua
+  language_color: '#000080'
+  homepage: ''
+  updated_at: '2026-08-15T03:32:21Z'
+  topics:
+  - bash
+  - bashrc
+  - dotfile
+  - dotfiles
+  - dotfiles-linux
+  - konsole
+  - konsole-color-schemes
+  - nvim
+  - nvim-config
+  - nvim-configs
 - name: Esp32-MQTT-BME280
   description: My own Esp32-C3-Super-Mini + BME280 + MQTT project, because I needed
     something reliable. In my opinion it is really simple to use!
@@ -40,26 +60,6 @@ repositories:
   - home-automation
   - iot
   - mqtt
-- name: dotfiles
-  description: My dotfiles, from ~/
-  url: https://github.com/seesee010/dotfiles
-  stars: 0
-  forks: 0
-  language: Lua
-  language_color: '#000080'
-  homepage: ''
-  updated_at: '2026-08-15T00:51:51Z'
-  topics:
-  - bash
-  - bashrc
-  - dotfile
-  - dotfiles
-  - dotfiles-linux
-  - konsole
-  - konsole-color-schemes
-  - nvim
-  - nvim-config
-  - nvim-configs
 - name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
