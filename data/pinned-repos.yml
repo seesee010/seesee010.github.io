@@ -1,4 +1,4 @@
-last_updated: '2026-08-22T01:10:08.433051+00:00'
+last_updated: '2026-08-23T01:15:44.924316+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -25,10 +25,10 @@ repositories:
   url: https://github.com/seesee010/dotfiles
   stars: 0
   forks: 0
-  language: Lua
-  language_color: '#000080'
+  language: Shell
+  language_color: '#89e051'
   homepage: ''
-  updated_at: '2026-08-21T23:19:25Z'
+  updated_at: '2026-08-22T17:34:42Z'
   topics:
   - bash
   - bashrc
