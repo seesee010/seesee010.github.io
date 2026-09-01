@@ -1,4 +1,4 @@
-last_updated: '2026-08-31T03:55:14.503655+00:00'
+last_updated: '2026-09-01T03:46:16.065135+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -21,14 +21,14 @@ repositories:
   - cli
   - lo3
 - name: dotfiles
-  description: My dotfiles, from "$HOME"
+  description: My dotfiles I care about, from "$HOME"
   url: https://github.com/seesee010/dotfiles
   stars: 0
   forks: 0
   language: Shell
   language_color: '#89e051'
   homepage: ''
-  updated_at: '2026-08-30T10:25:24Z'
+  updated_at: '2026-08-31T17:07:13Z'
   topics:
   - bash
   - bashrc
