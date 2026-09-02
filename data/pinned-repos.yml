@@ -1,4 +1,4 @@
-last_updated: '2026-09-01T03:46:16.065135+00:00'
+last_updated: '2026-09-02T03:05:27.144754+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -11,7 +11,7 @@ repositories:
   language: C
   language_color: '#555555'
   homepage: https://lo3-lang.github.io/
-  updated_at: '2026-08-15T00:44:56Z'
+  updated_at: '2026-09-01T20:48:22Z'
   topics:
   - c
   - cmake
@@ -28,7 +28,7 @@ repositories:
   language: Shell
   language_color: '#89e051'
   homepage: ''
-  updated_at: '2026-08-31T17:07:13Z'
+  updated_at: '2026-09-01T19:32:30Z'
   topics:
   - bash
   - bashrc
@@ -70,7 +70,7 @@ repositories:
   language: KiCad Layout
   language_color: '#2f4aab'
   homepage: ''
-  updated_at: '2026-03-16T18:50:21Z'
+  updated_at: '2026-09-01T20:40:40Z'
   topics:
   - gerber
   - gerber-files
@@ -98,21 +98,3 @@ repositories:
   - streamlit
   - trading
   - vibecoding
-- name: DynArray
-  description: I wondered about how dynamic Arrays worked and this lib is just my
-    own dynamic Array called `DynArray`
-  url: https://github.com/seesee010/DynArray
-  stars: 0
-  forks: 0
-  language: C
-  language_color: '#555555'
-  homepage: ''
-  updated_at: '2026-04-08T12:13:38Z'
-  topics:
-  - algorithms
-  - c
-  - data-structures
-  - dynamic-array
-  - education
-  - library
-  - memory-management
