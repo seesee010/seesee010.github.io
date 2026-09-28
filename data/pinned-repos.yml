@@ -1,4 +1,4 @@
-last_updated: '2026-09-27T03:53:40.516732+00:00'
+last_updated: '2026-09-28T03:53:37.196337+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -82,3 +82,21 @@ repositories:
   - sensor
   - spi
   - spi-display
+- name: keyboard
+  description: From "how to build the keyboard" to the layout to some themes.
+  url: https://github.com/seesee010/keyboard
+  stars: 1
+  forks: 0
+  language: null
+  language_color: null
+  homepage: ''
+  updated_at: '2026-09-07T05:06:21Z'
+  topics:
+  - dactyl-manuform
+  - firmware
+  - journal
+  - journey
+  - keyboard
+  - keyboard-firmware
+  - keyboard-layout
+  - keyboards
