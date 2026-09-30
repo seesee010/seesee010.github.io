@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetches pinned repositories and contribution activity from GitHub via GraphQL,
-updates data files, and regenerates docs/index.html with:
+updates data files, and regenerates docs/stats/index.html with:
 - Stats dashboard (contributions, commits, PRs, repos, stars, followers)
 - Activity area chart (365-day SVG with gray->green->red gradient)
 - Language bar (based on ALL repositories, not just pinned ones)
@@ -23,7 +23,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 DATA_FILE = os.path.join(ROOT, "data", "pinned-repos.yml")
 ACTIVITY_FILE = os.path.join(ROOT, "data", "activity.json")
-INDEX_FILE = os.path.join(ROOT, "docs", "index.html")
+INDEX_FILE = os.path.join(ROOT, "docs", "stats", "index.html")
 
 GRAPHQL_URL = "https://api.github.com/graphql"
 GRAPHQL_QUERY = """
