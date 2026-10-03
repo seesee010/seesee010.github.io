@@ -1,4 +1,4 @@
-last_updated: '2026-10-02T04:16:01.494765+00:00'
+last_updated: '2026-10-03T03:58:35.540677+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -100,3 +100,19 @@ repositories:
   - keyboard-firmware
   - keyboard-layout
   - keyboards
+- name: webuntis-scraper
+  description: The best webuntis scraper!
+  url: https://github.com/seesee010/webuntis-scraper
+  stars: 0
+  forks: 1
+  language: Python
+  language_color: '#3572A5'
+  homepage: ''
+  updated_at: '2026-10-02T22:48:55Z'
+  topics:
+  - untis
+  - webuntis
+  - webuntis-scraper
+  - webuntis-viewer
+  - playwright
+  - python
