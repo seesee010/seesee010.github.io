@@ -1,4 +1,4 @@
-last_updated: '2026-10-04T04:31:38.730205+00:00'
+last_updated: '2026-10-05T04:16:55.299150+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -85,12 +85,12 @@ repositories:
 - name: keyboard
   description: From "how to build the keyboard" to the layout to some themes.
   url: https://github.com/seesee010/keyboard
-  stars: 1
+  stars: 0
   forks: 0
   language: null
   language_color: null
   homepage: ''
-  updated_at: '2026-09-29T17:05:58Z'
+  updated_at: '2026-10-04T04:53:31Z'
   topics:
   - dactyl-manuform
   - firmware
