@@ -1,4 +1,4 @@
-last_updated: '2026-10-26T03:25:32.705548+00:00'
+last_updated: '2026-10-27T03:52:26.329075+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -40,26 +40,6 @@ repositories:
   - nvim
   - nvim-config
   - nvim-configs
-- name: Esp32-MQTT-BME280
-  description: My own Esp32-C3-Super-Mini + BME280 + MQTT project, because I needed
-    something reliable. In my opinion it is really simple to use!
-  url: https://github.com/seesee010/Esp32-MQTT-BME280
-  stars: 0
-  forks: 0
-  language: C++
-  language_color: '#f34b7d'
-  homepage: ''
-  updated_at: '2026-10-21T13:58:00Z'
-  topics:
-  - arduino
-  - bme280
-  - cpp
-  - embedded
-  - esp32-c3
-  - esp32-c3-super-mini
-  - home-automation
-  - iot
-  - mqtt
 - name: stm32-lcd-thermometer
   description: 'A PCB Project, from pcb to C - all without any libs. Functionality:
     A pcb - with CPU, Sensor, Display. The core functionality is to gain data (from
@@ -100,19 +80,23 @@ repositories:
   - keyboard-firmware
   - keyboard-layout
   - keyboards
-- name: webuntis-scraper
-  description: The best webuntis scraper!
-  url: https://github.com/seesee010/webuntis-scraper
+- name: webuntis-frontend
+  description: the best frontend
+  url: https://github.com/seesee010/webuntis-frontend
+  stars: 0
+  forks: 0
+  language: TypeScript
+  language_color: '#3178c6'
+  homepage: ''
+  updated_at: '2026-10-21T09:05:37Z'
+  topics: []
+- name: yt-img
+  description: null
+  url: https://github.com/seesee010/yt-img
   stars: 1
-  forks: 1
+  forks: 0
   language: Python
   language_color: '#3572A5'
   homepage: ''
-  updated_at: '2026-10-12T13:28:05Z'
-  topics:
-  - untis
-  - webuntis
-  - webuntis-scraper
-  - webuntis-viewer
-  - playwright
-  - python
+  updated_at: '2026-10-27T02:06:28Z'
+  topics: []
