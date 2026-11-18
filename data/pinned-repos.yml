@@ -1,4 +1,4 @@
-last_updated: '2026-11-17T06:45:01.455982+00:00'
+last_updated: '2026-11-18T06:03:11.405260+00:00'
 username: seesee010
 repositories:
 - name: lo3-core
@@ -82,21 +82,11 @@ repositories:
   - keyboards
 - name: webuntis-frontend
   description: the best frontend
-  url: https://github.com/seesee010/webuntis-frontend
-  stars: 1
+  url: https://github.com/toolsRebuild/webuntis-frontend
+  stars: 2
   forks: 1
   language: TypeScript
   language_color: '#3178c6'
   homepage: ''
-  updated_at: '2026-11-13T08:00:09Z'
-  topics: []
-- name: yt-img
-  description: null
-  url: https://github.com/seesee010/yt-img
-  stars: 1
-  forks: 0
-  language: Python
-  language_color: '#3572A5'
-  homepage: ''
-  updated_at: '2026-10-27T02:06:28Z'
+  updated_at: '2026-11-17T14:39:19Z'
   topics: []
